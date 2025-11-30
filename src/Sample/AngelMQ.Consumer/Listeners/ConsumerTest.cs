@@ -1,4 +1,7 @@
 using AngelMQ.Channels;
+using AngelMQ.Consumers;
+using AngelMQ.Properties;
+using AngelMQ.Queues;
 
 namespace AngelMQ.Consumer.Listeners;
 
@@ -7,23 +10,38 @@ public sealed class ConsumerTest(IServiceScopeFactory serviceScopeFactory) : Bac
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         using var scope = serviceScopeFactory.CreateScope();
+        var consumerProvider = scope.ServiceProvider.GetRequiredService<IConsumerProvider>();
         var channelProvider = scope.ServiceProvider.GetRequiredService<IChannelProvider>();
+        var queueSetup = scope.ServiceProvider.GetRequiredService<IQueueSetup>();
+
+        var queueProperties = new QueueProperties
+        {
+            QueueName = "accounts",
+            ExchangeName = "accounts.exchange",
+            ExchangeType = "topic",
+            RoutingKeys = ["create.#", "update.#"],
+            EnableDeadLetter = true,
+            EnableParkingLot = true
+        };
+
+        var channel = await channelProvider.GetChannelAsync();
+        var consumer = await consumerProvider.CreateConsumerAsync();
+        await queueSetup.CreateQueueAsync(channel, queueProperties);
+
+        await channel.BasicConsumeAsync(
+            queue: queueProperties.QueueName,
+            autoAck: false,
+            consumerTag: $"consumer-{Guid.NewGuid()}",
+            noLocal: false,
+            exclusive: false,
+            arguments: null,
+            consumer: consumer,
+            cancellationToken: stoppingToken
+        );
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            await CreateQueue(channelProvider);
             await Task.Delay(5000, stoppingToken);
         }
-    }
-
-    private async Task CreateQueue(IChannelProvider channelProvider)
-    {
-        var channel = await channelProvider.GetChannelAsync(10);
-
-        await channel.QueueDeclareAsync(queue: "test-queue",
-                                        durable: false,
-                                        exclusive: false,
-                                        autoDelete: false,
-                                        arguments: null);
     }
 }

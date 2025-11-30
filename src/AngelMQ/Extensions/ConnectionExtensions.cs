@@ -1,6 +1,8 @@
 using AngelMQ.Channels;
 using AngelMQ.Connections;
+using AngelMQ.Consumers;
 using AngelMQ.Properties;
+using AngelMQ.Queues;
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
 
@@ -14,8 +16,10 @@ public static class ConnectionExtensions
         configure(properties);
 
         services.AddConnectionFactory(properties)
-                .AddTransient<IRabbitMQConnectionProvider, RabbitMQConnectionProvider>()
-                .AddTransient<IChannelProvider, ChannelProvider>();
+                .AddScoped<IRabbitMQConnectionProvider, RabbitMQConnectionProvider>()
+                .AddScoped<IChannelProvider, ChannelProvider>()
+                .AddScoped<IConsumerProvider, ConsumerProvider>()
+                .AddScoped<IQueueSetup, QueueSetup>();
 
         return services;
     }
