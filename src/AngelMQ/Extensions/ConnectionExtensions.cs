@@ -1,3 +1,4 @@
+using AngelMQ.Channels;
 using AngelMQ.Connection;
 using AngelMQ.Properties;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,7 +14,8 @@ public static class ConnectionExtensions
         configure(properties);
 
         services.AddConnectionFactory(properties)
-                .AddTransient<IRabbitMQConnectionProvider, RabbitMQConnectionProvider>();
+                .AddTransient<IRabbitMQConnectionProvider, RabbitMQConnectionProvider>()
+                .AddTransient<IChannelProvider, ChannelProvider>();
 
         return services;
     }

@@ -1,4 +1,4 @@
-using AngelMQ.Connection;
+using AngelMQ.Channels;
 
 namespace AngelMQ.Consumer.Listeners;
 
@@ -7,13 +7,23 @@ public sealed class ConsumerTest(IServiceScopeFactory serviceScopeFactory) : Bac
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         using var scope = serviceScopeFactory.CreateScope();
-        var connection = scope.ServiceProvider.GetRequiredService<IRabbitMQConnectionProvider>();
+        var channelProvider = scope.ServiceProvider.GetRequiredService<IChannelProvider>();
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            var conn = await connection.GetConnectionAsync();
-            Console.WriteLine($"Connection State: {conn.IsOpen}");
+            await CreateQueue(channelProvider);
             await Task.Delay(5000, stoppingToken);
         }
+    }
+
+    private async Task CreateQueue(IChannelProvider channelProvider)
+    {
+        var channel = await channelProvider.GetChannelAsync(10);
+
+        await channel.QueueDeclareAsync(queue: "test-queue",
+                                        durable: false,
+                                        exclusive: false,
+                                        autoDelete: false,
+                                        arguments: null);
     }
 }
