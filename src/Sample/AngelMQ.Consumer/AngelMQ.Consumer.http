@@ -1,0 +1,6 @@
+@AngelMQ.Consumer_HostAddress = http://localhost:5290
+
+GET {{AngelMQ.Consumer_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
