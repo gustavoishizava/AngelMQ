@@ -1,5 +1,5 @@
 using AngelMQ.Channels;
-using AngelMQ.Connection;
+using AngelMQ.Connections;
 using AngelMQ.Properties;
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;

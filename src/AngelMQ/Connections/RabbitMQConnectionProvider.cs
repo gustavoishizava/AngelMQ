@@ -8,7 +8,7 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
 
-namespace AngelMQ.Connection;
+namespace AngelMQ.Connections;
 
 public sealed class RabbitMQConnectionProvider(ILogger<RabbitMQConnectionProvider> logger,
                                                IConnectionFactory connectionFactory,

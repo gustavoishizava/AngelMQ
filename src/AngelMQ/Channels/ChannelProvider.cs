@@ -1,4 +1,4 @@
-using AngelMQ.Connection;
+using AngelMQ.Connections;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 

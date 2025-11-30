@@ -1,6 +1,6 @@
 using RabbitMQ.Client;
 
-namespace AngelMQ.Connection;
+namespace AngelMQ.Connections;
 
 public interface IRabbitMQConnectionProvider
 {
