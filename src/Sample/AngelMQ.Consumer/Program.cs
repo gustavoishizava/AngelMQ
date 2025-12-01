@@ -23,6 +23,7 @@ builder.Services.AddConsumer<SampleMessageHandler, SampleMessage>(queueProps =>
     queueProps.RoutingKeys = ["create.#", "update.#"];
     queueProps.EnableDeadLetter = true;
     queueProps.EnableParkingLot = true;
+    queueProps.ConsumerCount = 1;
 });
 
 var app = builder.Build();

@@ -11,6 +11,7 @@ public sealed class QueueProperties<TMessage> where TMessage : class
     public bool EnableDeadLetter { get; set; }
     public bool EnableParkingLot { get; set; }
     public int ParkingLotTTL { get; set; } = 60000;
+    public int ConsumerCount { get; set; } = 1;
 
     public string DeadLetterQueueName => $"{QueueName}.{QueueSuffix.DeadLetterQueue}";
     public string DeadLetterExchangeName => $"{ExchangeName}.{QueueSuffix.DeadLetterExchange}";

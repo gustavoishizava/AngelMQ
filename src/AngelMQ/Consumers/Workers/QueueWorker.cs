@@ -6,7 +6,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RabbitMQ.Client;
 
 namespace AngelMQ.Consumers.Workers;
 
@@ -22,25 +21,22 @@ public sealed class QueueWorker<TMessage>(ILogger<QueueWorker<TMessage>> logger,
         logger.LogInformation("Starting consumer worker for message type {MessageType}", _messageName);
 
         using var scope = serviceScopeFactory.CreateScope();
-        var channelProvider = scope.ServiceProvider.GetRequiredService<IChannelProvider>();
-        var consumerProvider = scope.ServiceProvider.GetRequiredService<IConsumerProvider>();
-        var queueSetup = scope.ServiceProvider.GetRequiredService<IQueueSetup>();
-        var messageHandler = scope.ServiceProvider.GetRequiredService<IMessageHandler<TMessage>>();
         var queueProperties = scope.ServiceProvider.GetRequiredService<IOptions<QueueProperties<TMessage>>>();
 
-        var channel = await channelProvider.GetChannelAsync();
-        await queueSetup.CreateQueueAsync(channel, queueProperties.Value);
-
-        var consumer = await consumerProvider.CreateConsumerAsync(messageHandler);
-        await StartConsumerAsync(channel, consumer, queueProperties.Value.QueueName, stoppingToken);
-
-        logger.LogInformation("Consumer worker for message type {MessageType} is running", _messageName);
-
-        while (!stoppingToken.IsCancellationRequested)
+        if (queueProperties.Value.ConsumerCount <= 0)
         {
-            logger.LogDebug("Consumer worker for message type {MessageType} is alive", _messageName);
-            await Task.Delay(DelayIntervalMs, stoppingToken);
+            logger.LogWarning("No consumers configured for message type {MessageType}", _messageName);
+            return;
         }
+
+        await SetupAsync(queueProperties.Value);
+
+        var consumerTasks = Enumerable.Range(0, queueProperties.Value.ConsumerCount)
+                                          .Select(_ =>
+                                            StartConsumerAsync(queueProperties.Value.QueueName, stoppingToken))
+                                          .ToList();
+
+        await Task.WhenAll(consumerTasks);
     }
 
     public override Task StopAsync(CancellationToken cancellationToken)
@@ -49,11 +45,29 @@ public sealed class QueueWorker<TMessage>(ILogger<QueueWorker<TMessage>> logger,
         return base.StopAsync(cancellationToken);
     }
 
-    private async Task StartConsumerAsync(IChannel channel,
-                                          AsyncDefaultBasicConsumer consumer,
-                                          string queueName,
+    private async Task SetupAsync(QueueProperties<TMessage> queueProperties)
+    {
+        using var scope = serviceScopeFactory.CreateScope();
+        var channelProvider = scope.ServiceProvider.GetRequiredService<IChannelProvider>();
+        var queueSetup = scope.ServiceProvider.GetRequiredService<IQueueSetup>();
+
+        var channel = await channelProvider.GetChannelAsync();
+
+        await queueSetup.CreateQueueAsync(channel, queueProperties);
+        await channelProvider.CloseChannelAsync();
+    }
+
+    private async Task StartConsumerAsync(string queueName,
                                           CancellationToken cancellationToken)
     {
+        using var scope = serviceScopeFactory.CreateScope();
+        var channelProvider = scope.ServiceProvider.GetRequiredService<IChannelProvider>();
+        var consumerProvider = scope.ServiceProvider.GetRequiredService<IConsumerProvider>();
+
+        var channel = await channelProvider.GetChannelAsync();
+        var messageHandler = scope.ServiceProvider.GetRequiredService<IMessageHandler<TMessage>>();
+        var consumer = await consumerProvider.CreateConsumerAsync(messageHandler);
+
         await channel.BasicConsumeAsync(queue: queueName,
                                         autoAck: false,
                                         consumerTag: $"consumer-{Guid.NewGuid()}",
@@ -62,5 +76,13 @@ public sealed class QueueWorker<TMessage>(ILogger<QueueWorker<TMessage>> logger,
                                         arguments: null,
                                         consumer: consumer,
                                         cancellationToken: cancellationToken);
+
+        logger.LogInformation("Started consuming messages from queue {QueueName}", queueName);
+
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            logger.LogDebug("Consumer on queue {QueueName} is active", queueName);
+            await Task.Delay(DelayIntervalMs, cancellationToken);
+        }
     }
 }
