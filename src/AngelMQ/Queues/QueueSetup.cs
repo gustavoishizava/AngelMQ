@@ -7,8 +7,8 @@ namespace AngelMQ.Queues;
 
 public sealed class QueueSetup(ILogger<QueueSetup> logger) : IQueueSetup
 {
-    public async Task CreateQueueAsync(IChannel channel,
-                                       QueueProperties queueProperties)
+    public async Task CreateQueueAsync<TMessage>(IChannel channel,
+                                       QueueProperties<TMessage> queueProperties) where TMessage : class
     {
         if (queueProperties.EnableDeadLetter)
             await SetupDeadLetterQueueAsync(channel, queueProperties);
@@ -19,7 +19,9 @@ public sealed class QueueSetup(ILogger<QueueSetup> logger) : IQueueSetup
             await SetupParkingLotQueueAsync(channel, queueProperties);
     }
 
-    private async Task SetupMainQueueAsync(IChannel channel, QueueProperties queueProperties)
+    private async Task SetupMainQueueAsync<TMessage>(IChannel channel,
+                                                     QueueProperties<TMessage> queueProperties)
+                                                     where TMessage : class
     {
         var arguments = new Dictionary<string, object?>();
         if (queueProperties.EnableDeadLetter)
@@ -39,8 +41,9 @@ public sealed class QueueSetup(ILogger<QueueSetup> logger) : IQueueSetup
                              queueProperties.RoutingKeys);
     }
 
-    private async Task SetupDeadLetterQueueAsync(IChannel channel,
-                                                 QueueProperties queueProperties)
+    private async Task SetupDeadLetterQueueAsync<TMessage>(IChannel channel,
+                                                           QueueProperties<TMessage> queueProperties)
+                                                           where TMessage : class
     {
         await CreateExchangeAsync(channel,
                                   queueProperties.DeadLetterExchangeName,
@@ -54,8 +57,9 @@ public sealed class QueueSetup(ILogger<QueueSetup> logger) : IQueueSetup
                              queueProperties.RoutingKeys);
     }
 
-    private async Task SetupParkingLotQueueAsync(IChannel channel,
-                                         QueueProperties queueProperties)
+    private async Task SetupParkingLotQueueAsync<TMessage>(IChannel channel,
+                                                           QueueProperties<TMessage> queueProperties)
+                                                           where TMessage : class
     {
         var arguments = new Dictionary<string, object?>
         {

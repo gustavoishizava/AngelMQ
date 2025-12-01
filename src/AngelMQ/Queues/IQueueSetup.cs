@@ -5,6 +5,6 @@ namespace AngelMQ.Queues;
 
 public interface IQueueSetup
 {
-    Task CreateQueueAsync(IChannel channel,
-                          QueueProperties queueProperties);
+    Task CreateQueueAsync<TMessage>(IChannel channel,
+                          QueueProperties<TMessage> queueProperties) where TMessage : class;
 }

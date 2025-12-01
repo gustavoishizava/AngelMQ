@@ -4,6 +4,7 @@ using AngelMQ.Consumers;
 using AngelMQ.Messages;
 using AngelMQ.Properties;
 using AngelMQ.Queues;
+using Microsoft.Extensions.Options;
 
 namespace AngelMQ.Consumer.Listeners;
 
@@ -16,23 +17,14 @@ public sealed class ConsumerTest(IServiceScopeFactory serviceScopeFactory) : Bac
         var channelProvider = scope.ServiceProvider.GetRequiredService<IChannelProvider>();
         var queueSetup = scope.ServiceProvider.GetRequiredService<IQueueSetup>();
 
-        var queueProperties = new QueueProperties
-        {
-            QueueName = "accounts",
-            ExchangeName = "accounts.exchange",
-            ExchangeType = "topic",
-            RoutingKeys = ["create.#", "update.#"],
-            EnableDeadLetter = true,
-            EnableParkingLot = true
-        };
-
         var channel = await channelProvider.GetChannelAsync();
         var messageHandler = scope.ServiceProvider.GetRequiredService<IMessageHandler<SampleMessage>>();
         var consumer = await consumerProvider.CreateConsumerAsync(messageHandler);
-        await queueSetup.CreateQueueAsync(channel, queueProperties);
+        var queueProperties = scope.ServiceProvider.GetRequiredService<IOptions<QueueProperties<SampleMessage>>>();
+        await queueSetup.CreateQueueAsync(channel, queueProperties.Value);
 
         await channel.BasicConsumeAsync(
-            queue: queueProperties.QueueName,
+            queue: queueProperties.Value.QueueName,
             autoAck: false,
             consumerTag: $"consumer-{Guid.NewGuid()}",
             noLocal: false,

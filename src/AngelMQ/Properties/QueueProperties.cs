@@ -2,7 +2,7 @@ using AngelMQ.Constants;
 
 namespace AngelMQ.Properties;
 
-public sealed class QueueProperties
+public sealed class QueueProperties<TMessage> where TMessage : class
 {
     public string QueueName { get; set; } = string.Empty;
     public string ExchangeName { get; set; } = string.Empty;

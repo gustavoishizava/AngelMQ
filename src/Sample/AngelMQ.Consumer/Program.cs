@@ -15,7 +15,15 @@ builder.Services.AddRabbitMQ(options =>
     options.ConsumerDispatchConcurrency = 2;
 });
 
-builder.Services.AddConsumer<SampleMessageHandler, SampleMessage>();
+builder.Services.AddConsumer<SampleMessageHandler, SampleMessage>(queueProps =>
+{
+    queueProps.QueueName = "accounts";
+    queueProps.ExchangeName = "accounts.exchange";
+    queueProps.ExchangeType = "topic";
+    queueProps.RoutingKeys = ["create.#", "update.#"];
+    queueProps.EnableDeadLetter = true;
+    queueProps.EnableParkingLot = true;
+});
 
 builder.Services.AddHostedService<ConsumerTest>();
 
