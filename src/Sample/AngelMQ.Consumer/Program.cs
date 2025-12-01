@@ -25,8 +25,6 @@ builder.Services.AddConsumer<SampleMessageHandler, SampleMessage>(queueProps =>
     queueProps.EnableParkingLot = true;
 });
 
-builder.Services.AddHostedService<ConsumerTest>();
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

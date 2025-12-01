@@ -1,3 +1,4 @@
+using AngelMQ.Consumers.Workers;
 using AngelMQ.Messages;
 using AngelMQ.Properties;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,9 +12,10 @@ public static class ConsumerExtensions
         where TMessageHandler : class, IMessageHandler<TMessage>
         where TMessage : class
     {
-
         services.AddTransient<IMessageHandler<TMessage>, TMessageHandler>()
             .Configure(configureQueueProperties);
+
+        services.AddHostedService<QueueWorker<TMessage>>();
 
         return services;
     }
