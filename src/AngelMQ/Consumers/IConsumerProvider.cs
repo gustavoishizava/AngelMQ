@@ -1,9 +1,10 @@
-using AngelMQ.Properties;
+using AngelMQ.Messages;
 using RabbitMQ.Client;
 
 namespace AngelMQ.Consumers;
 
 public interface IConsumerProvider
 {
-    Task<AsyncDefaultBasicConsumer> CreateConsumerAsync();
+    Task<AsyncDefaultBasicConsumer> CreateConsumerAsync<TMessage>(
+        IMessageHandler<TMessage> messageHandler) where TMessage : class;
 }

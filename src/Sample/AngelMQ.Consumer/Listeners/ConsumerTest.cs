@@ -1,5 +1,7 @@
 using AngelMQ.Channels;
+using AngelMQ.Consumer.Listeners.Messages;
 using AngelMQ.Consumers;
+using AngelMQ.Messages;
 using AngelMQ.Properties;
 using AngelMQ.Queues;
 
@@ -25,7 +27,8 @@ public sealed class ConsumerTest(IServiceScopeFactory serviceScopeFactory) : Bac
         };
 
         var channel = await channelProvider.GetChannelAsync();
-        var consumer = await consumerProvider.CreateConsumerAsync();
+        var messageHandler = scope.ServiceProvider.GetRequiredService<IMessageHandler<SampleMessage>>();
+        var consumer = await consumerProvider.CreateConsumerAsync(messageHandler);
         await queueSetup.CreateQueueAsync(channel, queueProperties);
 
         await channel.BasicConsumeAsync(

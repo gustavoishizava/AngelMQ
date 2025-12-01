@@ -1,4 +1,5 @@
 using AngelMQ.Channels;
+using AngelMQ.Messages;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -8,17 +9,20 @@ namespace AngelMQ.Consumers;
 public sealed class ConsumerProvider(ILogger<ConsumerProvider> logger,
                                      IChannelProvider channelProvider) : IConsumerProvider
 {
-    public async Task<AsyncDefaultBasicConsumer> CreateConsumerAsync()
+    public async Task<AsyncDefaultBasicConsumer> CreateConsumerAsync<TMessage>(
+        IMessageHandler<TMessage> messageHandler) where TMessage : class
     {
         var channel = await channelProvider.GetChannelAsync();
-        return BuildConsumer(channel);
+        return BuildConsumer(channel, messageHandler);
     }
 
-    private AsyncDefaultBasicConsumer BuildConsumer(IChannel channel)
+    private AsyncDefaultBasicConsumer BuildConsumer<TMessage>(IChannel channel,
+                                                              IMessageHandler<TMessage> messageHandler)
+        where TMessage : class
     {
         var consumer = new AsyncEventingBasicConsumer(channel);
         consumer.RegisteredAsync += OnRegisteredAsync;
-        consumer.ReceivedAsync += OnReceivedAsync;
+        consumer.ReceivedAsync += (sender, args) => OnReceivedAsync(sender, args, messageHandler);
         consumer.ShutdownAsync += OnShutdownAsync;
 
         return consumer;
@@ -31,7 +35,9 @@ public sealed class ConsumerProvider(ILogger<ConsumerProvider> logger,
         return Task.CompletedTask;
     }
 
-    private async Task OnReceivedAsync(object? sender, BasicDeliverEventArgs args)
+    private async Task OnReceivedAsync<TMessage>(object? sender,
+                                                 BasicDeliverEventArgs args,
+                                                 IMessageHandler<TMessage> messageHandler) where TMessage : class
     {
         var consumer = (AsyncEventingBasicConsumer)sender!;
 
@@ -40,6 +46,7 @@ public sealed class ConsumerProvider(ILogger<ConsumerProvider> logger,
 
         try
         {
+            await messageHandler.HandleAsync(args);
             await consumer.Channel.BasicAckAsync(args.DeliveryTag, multiple: false);
             logger.LogInformation("ACK sent successfully for {DeliveryTag}", args.DeliveryTag);
         }
