@@ -2,7 +2,7 @@ using RabbitMQ.Client;
 
 namespace AngelMQ.Connections;
 
-public interface IRabbitMQConnectionProvider
+public interface IConnectionProvider
 {
     Task<IConnection> GetConnectionAsync();
 }

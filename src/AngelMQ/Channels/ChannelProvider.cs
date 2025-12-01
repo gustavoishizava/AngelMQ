@@ -5,7 +5,7 @@ using RabbitMQ.Client;
 namespace AngelMQ.Channels;
 
 public sealed class ChannelProvider(ILogger<ChannelProvider> logger,
-                                    IRabbitMQConnectionProvider connectionProvider) : IChannelProvider
+                                    IConnectionProvider connectionProvider) : IChannelProvider
 {
     private IChannel? _channel;
 

@@ -16,7 +16,7 @@ public static class ConnectionExtensions
         configure(properties);
 
         services.AddConnectionFactory(properties)
-                .AddScoped<IRabbitMQConnectionProvider, RabbitMQConnectionProvider>()
+                .AddSingleton<IConnectionProvider, ConnectionProvider>()
                 .AddScoped<IChannelProvider, ChannelProvider>()
                 .AddScoped<IConsumerProvider, ConsumerProvider>()
                 .AddScoped<IQueueSetup, QueueSetup>();
