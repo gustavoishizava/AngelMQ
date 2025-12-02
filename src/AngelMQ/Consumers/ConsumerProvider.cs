@@ -10,9 +10,9 @@ public sealed class ConsumerProvider(ILogger<ConsumerProvider> logger,
                                      IChannelProvider channelProvider) : IConsumerProvider
 {
     public async Task<AsyncDefaultBasicConsumer> CreateConsumerAsync<TMessage>(
-        IMessageHandler<TMessage> messageHandler) where TMessage : class
+        IMessageHandler<TMessage> messageHandler, ushort prefetchCount = 1) where TMessage : class
     {
-        var channel = await channelProvider.GetChannelAsync();
+        var channel = await channelProvider.GetChannelAsync(prefetchCount);
         return BuildConsumer(channel, messageHandler);
     }
 

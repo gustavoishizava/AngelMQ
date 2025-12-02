@@ -1,6 +1,7 @@
 using AngelMQ.Consumer.Listeners;
 using AngelMQ.Consumer.Listeners.Handlers;
 using AngelMQ.Consumer.Listeners.Messages;
+using AngelMQ.Consumer.Workers;
 using AngelMQ.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,7 +13,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddRabbitMQ(options =>
 {
-    options.ConsumerDispatchConcurrency = 2;
+    options.ConsumerDispatchConcurrency = 10;
 });
 
 builder.Services.AddConsumer<SampleMessageHandler, SampleMessage>(queueProps =>
@@ -24,7 +25,12 @@ builder.Services.AddConsumer<SampleMessageHandler, SampleMessage>(queueProps =>
     queueProps.EnableDeadLetter = true;
     queueProps.EnableParkingLot = true;
     queueProps.ConsumerCount = 1;
+    queueProps.PrefetchCount = 50;
 });
+
+builder.Services.AddMessagePublisher(10);
+
+builder.Services.AddHostedService<ProducerWorker>();
 
 var app = builder.Build();
 

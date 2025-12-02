@@ -33,7 +33,9 @@ public sealed class QueueWorker<TMessage>(ILogger<QueueWorker<TMessage>> logger,
 
         var consumerTasks = Enumerable.Range(0, queueProperties.Value.ConsumerCount)
                                           .Select(_ =>
-                                            StartConsumerAsync(queueProperties.Value.QueueName, stoppingToken))
+                                            StartConsumerAsync(queueProperties.Value.QueueName,
+                                                               queueProperties.Value.PrefetchCount,
+                                                               stoppingToken))
                                           .ToList();
 
         await Task.WhenAll(consumerTasks);
@@ -58,24 +60,23 @@ public sealed class QueueWorker<TMessage>(ILogger<QueueWorker<TMessage>> logger,
     }
 
     private async Task StartConsumerAsync(string queueName,
+                                          ushort prefetchCount,
                                           CancellationToken cancellationToken)
     {
         using var scope = serviceScopeFactory.CreateScope();
-        var channelProvider = scope.ServiceProvider.GetRequiredService<IChannelProvider>();
         var consumerProvider = scope.ServiceProvider.GetRequiredService<IConsumerProvider>();
 
-        var channel = await channelProvider.GetChannelAsync();
         var messageHandler = scope.ServiceProvider.GetRequiredService<IMessageHandler<TMessage>>();
-        var consumer = await consumerProvider.CreateConsumerAsync(messageHandler);
+        var consumer = await consumerProvider.CreateConsumerAsync(messageHandler, prefetchCount);
 
-        await channel.BasicConsumeAsync(queue: queueName,
-                                        autoAck: false,
-                                        consumerTag: $"consumer-{Guid.NewGuid()}",
-                                        noLocal: false,
-                                        exclusive: false,
-                                        arguments: null,
-                                        consumer: consumer,
-                                        cancellationToken: cancellationToken);
+        await consumer.Channel.BasicConsumeAsync(queue: queueName,
+                                                 autoAck: false,
+                                                 consumerTag: $"consumer-{Guid.NewGuid()}",
+                                                 noLocal: false,
+                                                 exclusive: false,
+                                                 arguments: null,
+                                                 consumer: consumer,
+                                                 cancellationToken: cancellationToken);
 
         logger.LogInformation("Started consuming messages from queue {QueueName}", queueName);
 
