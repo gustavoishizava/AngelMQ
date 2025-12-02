@@ -13,6 +13,7 @@ public sealed class QueueProperties<TMessage> where TMessage : class
     public int ParkingLotTTL { get; set; } = 60000;
     public int ConsumerCount { get; set; } = 1;
     public ushort PrefetchCount { get; set; } = 1;
+    public ushort MaxRetryAttempts { get; set; } = 3;
 
     public string DeadLetterQueueName => $"{QueueName}.{QueueSuffix.DeadLetterQueue}";
     public string DeadLetterExchangeName => $"{ExchangeName}.{QueueSuffix.DeadLetterExchange}";

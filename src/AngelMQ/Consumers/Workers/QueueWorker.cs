@@ -33,8 +33,7 @@ public sealed class QueueWorker<TMessage>(ILogger<QueueWorker<TMessage>> logger,
 
         var consumerTasks = Enumerable.Range(0, queueProperties.Value.ConsumerCount)
                                           .Select(_ =>
-                                            StartConsumerAsync(queueProperties.Value.QueueName,
-                                                               queueProperties.Value.PrefetchCount,
+                                            StartConsumerAsync(queueProperties.Value,
                                                                stoppingToken))
                                           .ToList();
 
@@ -59,17 +58,16 @@ public sealed class QueueWorker<TMessage>(ILogger<QueueWorker<TMessage>> logger,
         await channelProvider.CloseChannelAsync();
     }
 
-    private async Task StartConsumerAsync(string queueName,
-                                          ushort prefetchCount,
+    private async Task StartConsumerAsync(QueueProperties<TMessage> queueProperties,
                                           CancellationToken cancellationToken)
     {
         using var scope = serviceScopeFactory.CreateScope();
         var consumerProvider = scope.ServiceProvider.GetRequiredService<IConsumerProvider>();
 
         var messageHandler = scope.ServiceProvider.GetRequiredService<IMessageHandler<TMessage>>();
-        var consumer = await consumerProvider.CreateConsumerAsync(messageHandler, prefetchCount);
+        var consumer = await consumerProvider.CreateConsumerAsync(messageHandler, queueProperties);
 
-        await consumer.Channel.BasicConsumeAsync(queue: queueName,
+        await consumer.Channel.BasicConsumeAsync(queue: queueProperties.QueueName,
                                                  autoAck: false,
                                                  consumerTag: $"consumer-{Guid.NewGuid()}",
                                                  noLocal: false,
@@ -78,11 +76,11 @@ public sealed class QueueWorker<TMessage>(ILogger<QueueWorker<TMessage>> logger,
                                                  consumer: consumer,
                                                  cancellationToken: cancellationToken);
 
-        logger.LogInformation("Started consuming messages from queue {QueueName}", queueName);
+        logger.LogInformation("Started consuming messages from queue {QueueName}", queueProperties.QueueName);
 
         while (!cancellationToken.IsCancellationRequested)
         {
-            logger.LogDebug("Consumer on queue {QueueName} is active", queueName);
+            logger.LogDebug("Consumer on queue {QueueName} is active", queueProperties.QueueName);
             await Task.Delay(DelayIntervalMs, cancellationToken);
         }
     }

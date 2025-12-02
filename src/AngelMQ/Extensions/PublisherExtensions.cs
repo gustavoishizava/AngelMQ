@@ -1,4 +1,5 @@
 using AngelMQ.Channels.Pool;
+using AngelMQ.Messages.Errors;
 using AngelMQ.Properties;
 using AngelMQ.Publishers;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,6 +11,7 @@ public static class PublisherExtensions
     public static IServiceCollection AddMessagePublisher(this IServiceCollection services, int? maxPoolSize = null)
     {
         return services.AddSingleton<IMessagePublisher, MessagePublisher>()
+            .AddSingleton<IMessageErrorHandler, MessageErrorHandler>()
             .AddSingleton<IChannelPool, ChannelPool>()
             .Configure<ChannelPoolProperties>(options =>
             {

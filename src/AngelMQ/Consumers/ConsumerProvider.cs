@@ -1,5 +1,7 @@
 using AngelMQ.Channels;
 using AngelMQ.Messages;
+using AngelMQ.Messages.Errors;
+using AngelMQ.Properties;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -7,22 +9,28 @@ using RabbitMQ.Client.Events;
 namespace AngelMQ.Consumers;
 
 public sealed class ConsumerProvider(ILogger<ConsumerProvider> logger,
-                                     IChannelProvider channelProvider) : IConsumerProvider
+                                     IChannelProvider channelProvider,
+                                     IMessageErrorHandler messageErrorHandler) : IConsumerProvider
 {
-    public async Task<AsyncDefaultBasicConsumer> CreateConsumerAsync<TMessage>(
-        IMessageHandler<TMessage> messageHandler, ushort prefetchCount = 1) where TMessage : class
+    public async Task<AsyncDefaultBasicConsumer> CreateConsumerAsync<TMessage>(IMessageHandler<TMessage> messageHandler,
+                                                                               QueueProperties<TMessage> queueProperties)
+                                                                               where TMessage : class
     {
-        var channel = await channelProvider.GetChannelAsync(prefetchCount);
-        return BuildConsumer(channel, messageHandler);
+        var channel = await channelProvider.GetChannelAsync(queueProperties.PrefetchCount);
+        return BuildConsumer(channel, messageHandler, queueProperties);
     }
 
     private AsyncDefaultBasicConsumer BuildConsumer<TMessage>(IChannel channel,
-                                                              IMessageHandler<TMessage> messageHandler)
+                                                              IMessageHandler<TMessage> messageHandler,
+                                                              QueueProperties<TMessage> queueProperties)
         where TMessage : class
     {
         var consumer = new AsyncEventingBasicConsumer(channel);
         consumer.RegisteredAsync += OnRegisteredAsync;
-        consumer.ReceivedAsync += (sender, args) => OnReceivedAsync(sender, args, messageHandler);
+        consumer.ReceivedAsync += (sender, args) => OnReceivedAsync(sender,
+                                                                    args,
+                                                                    messageHandler,
+                                                                    queueProperties);
         consumer.ShutdownAsync += OnShutdownAsync;
 
         return consumer;
@@ -37,22 +45,26 @@ public sealed class ConsumerProvider(ILogger<ConsumerProvider> logger,
 
     private async Task OnReceivedAsync<TMessage>(object? sender,
                                                  BasicDeliverEventArgs args,
-                                                 IMessageHandler<TMessage> messageHandler) where TMessage : class
+                                                 IMessageHandler<TMessage> messageHandler,
+                                                 QueueProperties<TMessage> queueProperties) where TMessage : class
     {
         var consumer = (AsyncEventingBasicConsumer)sender!;
 
-        logger.LogInformation("Message received: {DeliveryTag}",
-                              args.DeliveryTag);
+        logger.LogDebug("Message received: {DeliveryTag}", args.DeliveryTag);
 
         try
         {
             await messageHandler.HandleAsync(args);
             await consumer.Channel.BasicAckAsync(args.DeliveryTag, multiple: false);
-            logger.LogInformation("ACK sent successfully for {DeliveryTag}", args.DeliveryTag);
+
+            logger.LogDebug("ACK sent successfully for {DeliveryTag}", args.DeliveryTag);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error sending ACK for {DeliveryTag}", args.DeliveryTag);
+            await messageErrorHandler.HandleAsync(queueProperties,
+                                                  consumer.Channel,
+                                                  args,
+                                                  ex);
         }
     }
 

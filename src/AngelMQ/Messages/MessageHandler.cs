@@ -16,16 +16,11 @@ public abstract class MessageHandler<TMessage>(ILogger<MessageHandler<TMessage>>
 
     public async Task HandleAsync(BasicDeliverEventArgs args)
     {
-        try
-        {
-            TMessage? message = DeserializeMessage(args.Body);
-            IDictionary<string, string> headers = ExtractHeaders(args.BasicProperties);
-            await ProcessAsync(message, headers, args);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Error processing message with DeliveryTag {DeliveryTag}", args.DeliveryTag);
-        }
+        logger.LogDebug("Handling message: {DeliveryTag}", args.DeliveryTag);
+
+        TMessage? message = DeserializeMessage(args.Body);
+        IDictionary<string, string> headers = ExtractHeaders(args.BasicProperties);
+        await ProcessAsync(message, headers, args);
     }
 
     protected abstract Task ProcessAsync(TMessage? message,

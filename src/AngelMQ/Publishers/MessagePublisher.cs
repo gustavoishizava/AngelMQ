@@ -49,6 +49,33 @@ public sealed class MessagePublisher(ILogger<MessagePublisher> logger,
         }
     }
 
+    public async Task PublishAsync(ReadOnlyMemory<byte> body, string exchange, string routingKey, BasicProperties? properties = null)
+    {
+        logger.LogDebug("Publishing message to exchange '{Exchange}' with routing key '{RoutingKey}'", exchange, routingKey);
+
+        var channel = await channelPool.GetAsync();
+
+        try
+        {
+            await channel.BasicPublishAsync(exchange,
+                                            routingKey,
+                                            false,
+                                            properties ?? GetProperties(null),
+                                            body);
+
+            logger.LogDebug("Message published to exchange '{Exchange}' with routing key '{RoutingKey}'", exchange, routingKey);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error publishing message to exchange '{Exchange}' with routing key '{RoutingKey}'", exchange, routingKey);
+            throw;
+        }
+        finally
+        {
+            await channelPool.ReturnAsync(channel);
+        }
+    }
+
     private static ReadOnlyMemory<byte> GetBody<TMessage>(TMessage message) where TMessage : class =>
         JsonSerializer.SerializeToUtf8Bytes(message, _jsonSerializerOptions);
 
