@@ -16,7 +16,7 @@ public class ProducerWorker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var tasks = Enumerable.Range(0, 50)
+        var tasks = Enumerable.Range(0, 10)
                               .Select(_ => PublishAsync(stoppingToken)).ToList();
 
         await Task.WhenAll(tasks);
@@ -34,7 +34,7 @@ public class ProducerWorker : BackgroundService
 
             await _messagePublisher.PublishAsync(message, "accounts.exchange", "create.user");
 
-            await Task.Delay(500, stoppingToken);
+            await Task.Delay(Random.Shared.Next(100, 200), stoppingToken);
         }
     }
 }

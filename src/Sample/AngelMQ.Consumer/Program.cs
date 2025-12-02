@@ -25,10 +25,10 @@ builder.Services.AddConsumer<SampleMessageHandler, SampleMessage>(queueProps =>
     queueProps.EnableDeadLetter = true;
     queueProps.EnableParkingLot = true;
     queueProps.ConsumerCount = 1;
-    queueProps.PrefetchCount = 50;
+    queueProps.PrefetchCount = 10;
 });
 
-builder.Services.AddMessagePublisher(10);
+builder.Services.AddMessagePublisher(5);
 
 builder.Services.AddHostedService<ProducerWorker>();
 

@@ -25,7 +25,7 @@ public sealed class ChannelProvider(ILogger<ChannelProvider> logger,
         logger.LogInformation("Creating new channel with prefetchCount: {PrefetchCount}",
                               prefetchCount);
 
-        var connection = await connectionProvider.GetConnectionAsync();
+        var connection = await connectionProvider.GetConnectionAsync(ConnectionType.Consumer);
 
         _channel = await connection.CreateChannelAsync();
         await _channel.BasicQosAsync(0,

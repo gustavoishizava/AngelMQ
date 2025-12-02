@@ -62,7 +62,7 @@ public sealed class ChannelPool(ILogger<ChannelPool> logger,
 
     private async Task<IChannel> CreateChannelAsync()
     {
-        var connection = await connectionProvider.GetConnectionAsync();
+        var connection = await connectionProvider.GetConnectionAsync(ConnectionType.Publisher);
         return await connection.CreateChannelAsync();
     }
 
