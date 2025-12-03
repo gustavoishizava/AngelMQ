@@ -9,10 +9,10 @@ namespace AngelMQ.Channels.Pool;
 
 public sealed class ChannelPool(ILogger<ChannelPool> logger,
                                 IConnectionProvider connectionProvider,
-                                IOptions<ChannelPoolProperties> poolPropertiesOptions) : IChannelPool, IAsyncDisposable, IDisposable
+                                IOptions<ConnectionProperties> connectionProperties) : IChannelPool, IAsyncDisposable, IDisposable
 {
     private readonly SemaphoreSlim _semaphore =
-        new(poolPropertiesOptions.Value.MaxPoolSize, poolPropertiesOptions.Value.MaxPoolSize);
+        new(connectionProperties.Value.MaxPoolSize, connectionProperties.Value.MaxPoolSize);
     private readonly ConcurrentStack<IChannel> _channels = new();
 
     private int _currentPoolSize = 0;
@@ -31,7 +31,7 @@ public sealed class ChannelPool(ILogger<ChannelPool> logger,
             await channel.DisposeAsync();
         }
 
-        if (Interlocked.Increment(ref _currentPoolSize) <= poolPropertiesOptions.Value.MaxPoolSize)
+        if (Interlocked.Increment(ref _currentPoolSize) <= connectionProperties.Value.MaxPoolSize)
         {
             logger.LogInformation("Creating new RabbitMQ channel. Current pool size: {CurrentPoolSize}", _currentPoolSize);
             var newChannel = await CreateChannelAsync();

@@ -1,34 +1,21 @@
-using AngelMQ.Channels;
+using System.Security.Authentication;
 using AngelMQ.Connections;
-using AngelMQ.Consumers;
 using AngelMQ.Properties;
-using AngelMQ.Queues;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 
 namespace AngelMQ.Extensions;
 
-public static class ConnectionExtensions
+internal static class ConnectionExtensions
 {
-    public static IServiceCollection AddRabbitMQ(this IServiceCollection services, Action<ConnectionProperties> configure)
+    internal static IServiceCollection AddConnectionFactory(this IServiceCollection services)
     {
-        ConnectionProperties properties = new();
-        configure(properties);
-
-        services.AddConnectionFactory(properties)
-                .AddSingleton<IConnectionProvider, ConnectionProvider>()
-                .AddScoped<IChannelProvider, ChannelProvider>()
-                .AddScoped<IConsumerProvider, ConsumerProvider>()
-                .AddScoped<IQueueSetup, QueueSetup>();
-
-        return services;
-    }
-
-    private static IServiceCollection AddConnectionFactory(this IServiceCollection services, ConnectionProperties properties)
-    {
-        services.AddSingleton<IConnectionFactory>(_ =>
+        services.AddSingleton<IConnectionFactory>(serviceProvider =>
         {
-            return new ConnectionFactory
+            var properties = serviceProvider.GetRequiredService<IOptions<ConnectionProperties>>().Value;
+
+            var connectionFactory = new ConnectionFactory
             {
                 HostName = properties.HostName,
                 Port = properties.Port,
@@ -38,7 +25,20 @@ public static class ConnectionExtensions
                 AutomaticRecoveryEnabled = true,
                 ConsumerDispatchConcurrency = properties.ConsumerDispatchConcurrency
             };
+
+            if (properties.EnableSsl || properties.SslProtocols.HasValue)
+            {
+                connectionFactory.Ssl = new SslOption
+                {
+                    Enabled = properties.EnableSsl,
+                    Version = properties.SslProtocols ?? SslProtocols.None
+                };
+            }
+
+            return connectionFactory;
         });
+
+        services.AddSingleton<IConnectionProvider, ConnectionProvider>();
 
         return services;
     }

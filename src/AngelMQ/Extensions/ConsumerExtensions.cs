@@ -1,12 +1,22 @@
+using AngelMQ.Consumers;
 using AngelMQ.Consumers.Workers;
 using AngelMQ.Messages;
 using AngelMQ.Properties;
+using AngelMQ.Queues;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AngelMQ.Extensions;
 
 public static class ConsumerExtensions
 {
+    internal static IServiceCollection AddConsumersManagement(this IServiceCollection services)
+    {
+        services.AddScoped<IConsumerProvider, ConsumerProvider>()
+                .AddScoped<IQueueSetup, QueueSetup>();
+
+        return services;
+    }
+
     public static IServiceCollection AddConsumer<TMessageHandler, TMessage>(this IServiceCollection services,
         Action<QueueProperties<TMessage>> configureQueueProperties)
         where TMessageHandler : class, IMessageHandler<TMessage>

@@ -1,4 +1,4 @@
-using AngelMQ.Consumer.Listeners;
+using System.Security.Authentication;
 using AngelMQ.Consumer.Listeners.Handlers;
 using AngelMQ.Consumer.Listeners.Messages;
 using AngelMQ.Consumer.Workers;
@@ -14,6 +14,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddRabbitMQ(options =>
 {
     options.ConsumerDispatchConcurrency = 10;
+    options.SetMaxPoolSize(5);
 });
 
 builder.Services.AddConsumer<SampleMessageHandler, SampleMessage>(queueProps =>
@@ -27,8 +28,6 @@ builder.Services.AddConsumer<SampleMessageHandler, SampleMessage>(queueProps =>
     queueProps.ConsumerCount = 1;
     queueProps.PrefetchCount = 10;
 });
-
-builder.Services.AddMessagePublisher(5);
 
 builder.Services.AddHostedService<ProducerWorker>();
 
