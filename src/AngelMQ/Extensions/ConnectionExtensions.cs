@@ -1,4 +1,3 @@
-using System.Security.Authentication;
 using AngelMQ.Connections;
 using AngelMQ.Constants;
 using AngelMQ.Properties;
@@ -27,14 +26,8 @@ internal static class ConnectionExtensions
                 ConsumerDispatchConcurrency = properties.ConsumerDispatchConcurrency
             };
 
-            if (properties.EnableSsl || properties.SslProtocols.HasValue)
-            {
-                connectionFactory.Ssl = new SslOption
-                {
-                    Enabled = properties.EnableSsl,
-                    Version = properties.SslProtocols ?? SslProtocols.None
-                };
-            }
+            if (properties.Ssl is not null)
+                connectionFactory.Ssl = properties.Ssl;
 
             return connectionFactory;
         });
