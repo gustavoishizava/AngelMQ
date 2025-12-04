@@ -33,9 +33,7 @@ public sealed class ConnectionProvider(ILogger<ConnectionProvider> logger,
 
         try
         {
-            var retryPolicy = BuildRetryPolicy();
-
-            await retryPolicy.Execute(async () =>
+            await BuildResiliencePipeline().ExecuteAsync(async _ =>
             {
                 logger.LogInformation("Attempting to connect to RabbitMQ...");
 
@@ -56,15 +54,26 @@ public sealed class ConnectionProvider(ILogger<ConnectionProvider> logger,
         }
     }
 
-    private RetryPolicy BuildRetryPolicy()
+    private ResiliencePipeline BuildResiliencePipeline()
     {
-        return Policy.Handle<ConnectFailureException>()
-                .Or<BrokerUnreachableException>()
-                .WaitAndRetry(options.Value.MaxRetryAttempts, retryAttemp =>
+        return new ResiliencePipelineBuilder()
+            .AddRetry(new RetryStrategyOptions
+            {
+                MaxRetryAttempts = options.Value.MaxRetryAttempts,
+                Delay = TimeSpan.FromSeconds(options.Value.DelayMultiplier),
+                BackoffType = DelayBackoffType.Exponential,
+                OnRetry = args =>
                 {
-                    logger.LogInformation($"Attemp #{retryAttemp}: connecting to RabbitMQ.");
-                    return TimeSpan.FromSeconds(Math.Pow(options.Value.DelayMultiplier, retryAttemp));
-                });
+                    logger.LogWarning("Connection attempt {RetryCount} failed. Retrying in {Delay} seconds...",
+                                      args.AttemptNumber + 1, args.RetryDelay.TotalSeconds);
+
+                    return default;
+                },
+                ShouldHandle = new PredicateBuilder()
+                    .Handle<ConnectFailureException>()
+                    .Handle<BrokerUnreachableException>()
+            })
+            .Build();
     }
 
     private Task OnConnectionShutdownAsync(object _, ShutdownEventArgs args)
