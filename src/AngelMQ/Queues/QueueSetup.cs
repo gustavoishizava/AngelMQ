@@ -10,12 +10,12 @@ public sealed class QueueSetup(ILogger<QueueSetup> logger) : IQueueSetup
     public async Task CreateQueueAsync<TMessage>(IChannel channel,
                                        QueueProperties<TMessage> queueProperties) where TMessage : class
     {
-        if (queueProperties.EnableDeadLetter)
+        if (queueProperties.DeadLetter.Enabled)
             await SetupDeadLetterQueueAsync(channel, queueProperties);
 
         await SetupMainQueueAsync(channel, queueProperties);
 
-        if (queueProperties.EnableParkingLot)
+        if (queueProperties.ParkingLot.Enabled)
             await SetupParkingLotQueueAsync(channel, queueProperties);
     }
 
@@ -24,7 +24,7 @@ public sealed class QueueSetup(ILogger<QueueSetup> logger) : IQueueSetup
                                                      where TMessage : class
     {
         var arguments = new Dictionary<string, object?>();
-        if (queueProperties.EnableDeadLetter)
+        if (queueProperties.DeadLetter.Enabled)
             arguments.Add(MessageHeaders.DeadLetterExchange, queueProperties.DeadLetterExchangeName);
 
         await CreateExchangeAsync(channel,
@@ -63,7 +63,7 @@ public sealed class QueueSetup(ILogger<QueueSetup> logger) : IQueueSetup
     {
         var arguments = new Dictionary<string, object?>
         {
-            { MessageHeaders.MessageTTL, queueProperties.ParkingLotTTL },
+            { MessageHeaders.MessageTTL, queueProperties.ParkingLot.TTL },
             { MessageHeaders.DeadLetterExchange, queueProperties.ExchangeName }
         };
 

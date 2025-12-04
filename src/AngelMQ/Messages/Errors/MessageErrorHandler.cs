@@ -53,7 +53,7 @@ public sealed class MessageErrorHandler(ILogger<MessageErrorHandler> logger,
     }
 
     private static bool ShouldRetryMessage<TMessage>(QueueProperties<TMessage> queueProperties, int currentRetryCount) where TMessage : class =>
-        queueProperties.EnableParkingLot && currentRetryCount <= queueProperties.MaxRetryAttempts;
+        queueProperties.ParkingLot.Enabled && currentRetryCount <= queueProperties.ParkingLot.MaxRetryAttempts;
 
     private async Task SendToDeadLetterAsync(IChannel messageChannel, BasicDeliverEventArgs args)
     {

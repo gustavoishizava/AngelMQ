@@ -24,8 +24,8 @@ builder.Services.AddConsumer<SampleMessageHandler, SampleMessage>(queueProps =>
     queueProps.ExchangeName = "accounts.exchange";
     queueProps.ExchangeType = "topic";
     queueProps.RoutingKeys = ["create.#", "update.#"];
-    queueProps.EnableDeadLetter = true;
-    queueProps.EnableParkingLot = true;
+    queueProps.DeadLetter.Enabled = true;
+    queueProps.ParkingLot.Enabled = true;
     queueProps.ConsumerCount = 2;
     queueProps.PrefetchCount = 250;
 });
