@@ -34,7 +34,7 @@ public class ProducerWorker : BackgroundService
 
             await _messagePublisher.PublishAsync(message, "accounts.exchange", "create.user");
 
-            await Task.Delay(Random.Shared.Next(100, 200), stoppingToken);
+            await Task.Delay(500, stoppingToken);
         }
     }
 }
