@@ -14,7 +14,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddRabbitMQ(options =>
 {
     options.ConsumerDispatchConcurrency = 10;
-    options.SetMaxPoolSize(5);
+    options.SetMaxChannelPoolSize(5);
+    options.ChannelPoolTimeout = TimeSpan.FromSeconds(10).Seconds;
 });
 
 builder.Services.AddConsumer<SampleMessageHandler, SampleMessage>(queueProps =>

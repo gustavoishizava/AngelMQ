@@ -15,14 +15,14 @@ public sealed class ChannelPool(ILogger<ChannelPool> logger,
                                 : IChannelPool, IAsyncDisposable, IDisposable
 {
     private readonly SemaphoreSlim _semaphore =
-        new(connectionProperties.Value.MaxPoolSize, connectionProperties.Value.MaxPoolSize);
+        new(connectionProperties.Value.MaxChannelPoolSize, connectionProperties.Value.MaxChannelPoolSize);
     private readonly ConcurrentStack<IChannel> _channels = new();
 
     private int _currentPoolSize = 0;
 
     public async Task<IChannel> GetAsync()
     {
-        await _semaphore.WaitAsync();
+        await _semaphore.WaitAsync(connectionProperties.Value.ChannelPoolTimeout);
 
         if (_channels.TryPop(out var channel))
         {
@@ -34,7 +34,7 @@ public sealed class ChannelPool(ILogger<ChannelPool> logger,
             await channel.DisposeAsync();
         }
 
-        if (Interlocked.Increment(ref _currentPoolSize) <= connectionProperties.Value.MaxPoolSize)
+        if (Interlocked.Increment(ref _currentPoolSize) <= connectionProperties.Value.MaxChannelPoolSize)
         {
             logger.LogInformation("Creating new RabbitMQ channel. Current pool size: {CurrentPoolSize}", _currentPoolSize);
             var newChannel = await CreateChannelAsync();
