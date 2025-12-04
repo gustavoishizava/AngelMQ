@@ -14,54 +14,46 @@ public sealed class ConnectionProvider(ILogger<ConnectionProvider> logger,
                                        IConnectionFactory connectionFactory,
                                        IOptions<ConnectionProperties> options) : IConnectionProvider
 {
-    private Dictionary<ConnectionType, IConnection> _connections = new();
+    private IConnection? _connection;
+    private bool _isConnected => _connection is not null && _connection.IsOpen;
     private readonly SemaphoreSlim _connectionLock = new(1, 1);
 
-    public async Task<IConnection> GetConnectionAsync(ConnectionType connectionType)
+    public async Task<IConnection> GetConnectionAsync()
     {
-        if (IsConnected(connectionType))
-            return _connections[connectionType]!;
+        if (_isConnected)
+            return _connection!;
 
         await _connectionLock.WaitAsync();
 
-        if (IsConnected(connectionType))
+        if (_isConnected)
         {
             _connectionLock.Release();
-            return _connections[connectionType]!;
+            return _connection!;
         }
 
         try
         {
             var retryPolicy = BuildRetryPolicy();
 
-            IConnection? connection = null;
-
             await retryPolicy.Execute(async () =>
             {
                 logger.LogInformation("Attempting to connect to RabbitMQ...");
 
-                connection = await connectionFactory.CreateConnectionAsync();
-                connection.ConnectionShutdownAsync += OnConnectionShutdownAsync;
-
-                _connections[connectionType] = connection;
+                _connection = await connectionFactory.CreateConnectionAsync();
+                _connection.ConnectionShutdownAsync += OnConnectionShutdownAsync;
 
                 logger.LogInformation("Successfully connected to RabbitMQ.");
             });
 
-            if (connection is null)
+            if (_connection is null)
                 throw new RabbitMQConnectionFailure("Failed to establish a connection to RabbitMQ.");
 
-            return connection!;
+            return _connection!;
         }
         finally
         {
             _connectionLock.Release();
         }
-    }
-
-    private bool IsConnected(ConnectionType connectionType)
-    {
-        return _connections.ContainsKey(connectionType) && (_connections[connectionType]?.IsOpen ?? false);
     }
 
     private RetryPolicy BuildRetryPolicy()

@@ -1,5 +1,6 @@
 using System.Security.Authentication;
 using AngelMQ.Connections;
+using AngelMQ.Constants;
 using AngelMQ.Properties;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -38,7 +39,8 @@ internal static class ConnectionExtensions
             return connectionFactory;
         });
 
-        services.AddSingleton<IConnectionProvider, ConnectionProvider>();
+        services.AddKeyedSingleton<IConnectionProvider, ConnectionProvider>(ConnectionNames.Consumer)
+                .AddKeyedSingleton<IConnectionProvider, ConnectionProvider>(ConnectionNames.Publisher);
 
         return services;
     }

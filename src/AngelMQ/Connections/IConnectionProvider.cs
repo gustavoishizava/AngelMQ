@@ -4,5 +4,5 @@ namespace AngelMQ.Connections;
 
 public interface IConnectionProvider
 {
-    Task<IConnection> GetConnectionAsync(ConnectionType connectionType);
+    Task<IConnection> GetConnectionAsync();
 }

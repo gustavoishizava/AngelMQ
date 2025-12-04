@@ -1,6 +1,8 @@
 using System.Collections.Concurrent;
 using AngelMQ.Connections;
+using AngelMQ.Constants;
 using AngelMQ.Properties;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
@@ -8,8 +10,9 @@ using RabbitMQ.Client;
 namespace AngelMQ.Channels.Pool;
 
 public sealed class ChannelPool(ILogger<ChannelPool> logger,
-                                IConnectionProvider connectionProvider,
-                                IOptions<ConnectionProperties> connectionProperties) : IChannelPool, IAsyncDisposable, IDisposable
+                                [FromKeyedServices(ConnectionNames.Publisher)] IConnectionProvider connectionProvider,
+                                IOptions<ConnectionProperties> connectionProperties)
+                                : IChannelPool, IAsyncDisposable, IDisposable
 {
     private readonly SemaphoreSlim _semaphore =
         new(connectionProperties.Value.MaxPoolSize, connectionProperties.Value.MaxPoolSize);
@@ -62,7 +65,7 @@ public sealed class ChannelPool(ILogger<ChannelPool> logger,
 
     private async Task<IChannel> CreateChannelAsync()
     {
-        var connection = await connectionProvider.GetConnectionAsync(ConnectionType.Publisher);
+        var connection = await connectionProvider.GetConnectionAsync();
         return await connection.CreateChannelAsync();
     }
 

@@ -1,11 +1,14 @@
 using AngelMQ.Connections;
+using AngelMQ.Constants;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 
 namespace AngelMQ.Channels;
 
 public sealed class ChannelProvider(ILogger<ChannelProvider> logger,
-                                    IConnectionProvider connectionProvider) : IChannelProvider
+                                    [FromKeyedServices(ConnectionNames.Consumer)] IConnectionProvider connectionProvider)
+                                    : IChannelProvider
 {
     private IChannel? _channel;
 
@@ -25,7 +28,7 @@ public sealed class ChannelProvider(ILogger<ChannelProvider> logger,
         logger.LogInformation("Creating new channel with prefetchCount: {PrefetchCount}",
                               prefetchCount);
 
-        var connection = await connectionProvider.GetConnectionAsync(ConnectionType.Consumer);
+        var connection = await connectionProvider.GetConnectionAsync();
 
         _channel = await connection.CreateChannelAsync();
         await _channel.BasicQosAsync(0,
