@@ -15,7 +15,7 @@ builder.Services.AddRabbitMQ(options =>
 {
     options.ConsumerDispatchConcurrency = 10;
     options.ChannelPool.SetMaxSize(5);
-    options.ChannelPool.SetTimeout(TimeSpan.FromSeconds(10).Seconds);
+    options.ChannelPool.SetTimeout(10000);
 });
 
 builder.Services.AddConsumer<SampleMessageHandler, SampleMessage>(queueProps =>
@@ -26,8 +26,8 @@ builder.Services.AddConsumer<SampleMessageHandler, SampleMessage>(queueProps =>
     queueProps.RoutingKeys = ["create.#", "update.#"];
     queueProps.EnableDeadLetter = true;
     queueProps.EnableParkingLot = true;
-    queueProps.ConsumerCount = 1;
-    queueProps.PrefetchCount = 10;
+    queueProps.ConsumerCount = 2;
+    queueProps.PrefetchCount = 250;
 });
 
 builder.Services.AddHostedService<ProducerWorker>();
