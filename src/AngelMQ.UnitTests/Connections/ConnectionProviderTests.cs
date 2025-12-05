@@ -18,7 +18,6 @@ public class ConnectionProviderTests
         _mocker = new AutoMocker();
         _connectionProperties = new ConnectionProperties
         {
-            HostName = "localhost",
             MaxRetryAttempts = 3,
             DelayMultiplier = 1
         };

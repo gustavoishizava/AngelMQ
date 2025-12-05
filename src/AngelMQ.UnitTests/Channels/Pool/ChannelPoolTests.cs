@@ -16,10 +16,7 @@ public class ChannelPoolTests
     public ChannelPoolTests()
     {
         _mocker = new AutoMocker();
-        _connectionProperties = new ConnectionProperties
-        {
-            HostName = "localhost"
-        };
+        _connectionProperties = new ConnectionProperties();
         _connectionProperties.ChannelPool.SetMaxSize(2);
 
         _mocker.Use(Options.Create(_connectionProperties));

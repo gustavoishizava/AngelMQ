@@ -14,22 +14,7 @@ internal static class ConnectionExtensions
         services.AddSingleton<IConnectionFactory>(serviceProvider =>
         {
             var properties = serviceProvider.GetRequiredService<IOptions<ConnectionProperties>>().Value;
-
-            var connectionFactory = new ConnectionFactory
-            {
-                HostName = properties.HostName,
-                Port = properties.Port,
-                UserName = properties.UserName,
-                Password = properties.Password,
-                VirtualHost = properties.VirtualHost,
-                AutomaticRecoveryEnabled = true,
-                ConsumerDispatchConcurrency = properties.ConsumerDispatchConcurrency
-            };
-
-            if (properties.Ssl is not null)
-                connectionFactory.Ssl = properties.Ssl;
-
-            return connectionFactory;
+            return properties.ConnectionFactory;
         });
 
         services.AddKeyedSingleton<IConnectionProvider, ConnectionProvider>(ConnectionNames.Consumer)

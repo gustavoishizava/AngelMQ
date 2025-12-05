@@ -1,4 +1,3 @@
-using System.Security.Authentication;
 using AngelMQ.Consumer.Listeners.Handlers;
 using AngelMQ.Consumer.Listeners.Messages;
 using AngelMQ.Consumer.Workers;
@@ -13,7 +12,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddRabbitMQ(options =>
 {
-    options.ConsumerDispatchConcurrency = 10;
+    options.ConnectionFactory.ConsumerDispatchConcurrency = 10;
     options.ChannelPool.SetMaxSize(5);
     options.ChannelPool.SetTimeout(10000);
 });
