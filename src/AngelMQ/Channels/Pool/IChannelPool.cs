@@ -6,4 +6,5 @@ public interface IChannelPool
 {
     Task<IChannel> GetAsync();
     Task ReturnAsync(IChannel channel);
+    int CurrentPoolSize { get; }
 }

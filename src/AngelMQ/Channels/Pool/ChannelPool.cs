@@ -20,6 +20,8 @@ public sealed class ChannelPool(ILogger<ChannelPool> logger,
 
     private int _currentPoolSize = 0;
 
+    public int CurrentPoolSize => _currentPoolSize;
+
     public async Task<IChannel> GetAsync()
     {
         await _semaphore.WaitAsync(connectionProperties.Value.ChannelPool.Timeout);
