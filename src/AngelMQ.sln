@@ -9,6 +9,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sample", "Sample", "{AA9712
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AngelMQ.Consumer", "Sample\AngelMQ.Consumer\AngelMQ.Consumer.csproj", "{821E18E0-975E-4106-A4F5-444DC1AAF436}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AngelMQ.UnitTests", "AngelMQ.UnitTests\AngelMQ.UnitTests.csproj", "{7E04AD65-950E-4ED4-85AF-3BFB0998F827}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,6 +28,10 @@ Global
 		{821E18E0-975E-4106-A4F5-444DC1AAF436}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{821E18E0-975E-4106-A4F5-444DC1AAF436}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{821E18E0-975E-4106-A4F5-444DC1AAF436}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E04AD65-950E-4ED4-85AF-3BFB0998F827}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E04AD65-950E-4ED4-85AF-3BFB0998F827}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E04AD65-950E-4ED4-85AF-3BFB0998F827}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E04AD65-950E-4ED4-85AF-3BFB0998F827}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{821E18E0-975E-4106-A4F5-444DC1AAF436} = {AA971203-7119-4987-9E61-9EAA69DEF77D}
