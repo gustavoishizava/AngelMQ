@@ -30,6 +30,13 @@ builder.Services.AddConsumer<SampleMessageHandler, SampleMessage>(queueProps =>
     queueProps.PrefetchCount = 250;
 });
 
+builder.Services.AddConsumer<QueueHandler, QueueMessage>(queueProps =>
+{
+    queueProps.QueueName = "notifications";
+    queueProps.ConsumerCount = 1;
+    queueProps.PrefetchCount = 250;
+});
+
 
 builder.Services.AddExchangePublisher<SampleMessage, SampleExchangePublisher>(props =>
 {
@@ -40,7 +47,7 @@ builder.Services.AddExchangePublisher<SampleMessage, SampleExchangePublisher>(pr
 
 builder.Services.AddQueuePublisher<QueueMessage, SampleQueuePublisher>(props =>
 {
-    props.Configuration.Name = "notifications.queue";
+    props.Configuration.Name = "notifications";
     props.AutoCreate = true;
 });
 

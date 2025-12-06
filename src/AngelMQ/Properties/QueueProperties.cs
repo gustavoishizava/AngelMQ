@@ -1,5 +1,3 @@
-using AngelMQ.Constants;
-
 namespace AngelMQ.Properties;
 
 public sealed class QueueProperties<TMessage> where TMessage : class

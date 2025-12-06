@@ -81,37 +81,46 @@ public sealed class QueueSetup(ILogger<QueueSetup> logger) : IQueueSetup
                              queueProperties.RoutingKeys);
     }
 
-    private Task CreateQueueAsync(IChannel channel,
-                                  string queueName,
-                                  IDictionary<string, object?>? arguments = null)
+    private async Task CreateQueueAsync(IChannel channel,
+                                        string queueName,
+                                        IDictionary<string, object?>? arguments = null)
     {
         logger.LogInformation("Creating queue: {QueueName}", queueName);
 
-        return channel.QueueDeclareAsync(queueName,
-                                         durable: true,
-                                         exclusive: false,
-                                         autoDelete: false,
-                                         arguments);
+        await channel.QueueDeclareAsync(queueName,
+                                        durable: true,
+                                        exclusive: false,
+                                        autoDelete: false,
+                                        arguments);
     }
 
-    private Task CreateExchangeAsync(IChannel channel, string exchangeName, string exchangeType)
+    private async Task CreateExchangeAsync(IChannel channel, string exchangeName, string exchangeType)
     {
+        if (string.IsNullOrWhiteSpace(exchangeName))
+            return;
+
         logger.LogInformation("Creating exchange: {ExchangeName} {ExchangeType}",
                               exchangeName,
                               exchangeType);
 
-        return channel.ExchangeDeclareAsync(exchangeName,
-                                            type: exchangeType,
-                                            durable: true,
-                                            autoDelete: false,
-                                            arguments: null);
+        await channel.ExchangeDeclareAsync(exchangeName,
+                                           type: exchangeType,
+                                           durable: true,
+                                           autoDelete: false,
+                                           arguments: null);
     }
 
     private async Task BindQueueAsync(IChannel channel,
-                                string queueName,
-                                string exchangeName,
-                                string[] routingKeys)
+                                      string queueName,
+                                      string exchangeName,
+                                      string[] routingKeys)
     {
+        if (string.IsNullOrWhiteSpace(exchangeName))
+            return;
+
+        if (routingKeys is null || routingKeys.Length == 0)
+            return;
+
         logger.LogInformation("Binding queue: {QueueName} to exchange: {ExchangeName} with routingKeys: {RoutingKey}",
                               queueName,
                               exchangeName,
