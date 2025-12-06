@@ -10,9 +10,14 @@ using Microsoft.Extensions.Options;
 namespace AngelMQ.Consumers.Workers;
 
 public sealed class QueueWorker<TMessage>(ILogger<QueueWorker<TMessage>> logger,
-                                          IServiceScopeFactory serviceScopeFactory) : BackgroundService
-    where TMessage : class
+                                          IServiceScopeFactory serviceScopeFactory,
+                                          IQueueSetup queueSetup,
+                                          IConsumerProvider consumerProvider,
+                                          IOptions<QueueProperties<TMessage>> options)
+                                          : BackgroundService
+                                          where TMessage : class
 {
+    private readonly QueueProperties<TMessage> _queueProperties = options.Value;
     private const int DelayIntervalMs = 5000;
     private string _messageName = typeof(TMessage).Name ?? "UnknownMessage";
 
@@ -20,21 +25,17 @@ public sealed class QueueWorker<TMessage>(ILogger<QueueWorker<TMessage>> logger,
     {
         logger.LogInformation("Starting consumer worker for message type {MessageType}", _messageName);
 
-        using var scope = serviceScopeFactory.CreateScope();
-        var queueProperties = scope.ServiceProvider.GetRequiredService<IOptions<QueueProperties<TMessage>>>();
-
-        if (queueProperties.Value.ConsumerCount <= 0)
+        if (_queueProperties.ConsumerCount <= 0)
         {
             logger.LogWarning("No consumers configured for message type {MessageType}", _messageName);
             return;
         }
 
-        await SetupAsync(queueProperties.Value);
+        await SetupAsync();
 
-        var consumerTasks = Enumerable.Range(0, queueProperties.Value.ConsumerCount)
+        var consumerTasks = Enumerable.Range(0, _queueProperties.ConsumerCount)
                                           .Select(_ =>
-                                            StartConsumerAsync(queueProperties.Value,
-                                                               stoppingToken))
+                                            StartConsumerAsync(stoppingToken))
                                           .ToList();
 
         await Task.WhenAll(consumerTasks);
@@ -46,42 +47,43 @@ public sealed class QueueWorker<TMessage>(ILogger<QueueWorker<TMessage>> logger,
         return base.StopAsync(cancellationToken);
     }
 
-    private async Task SetupAsync(QueueProperties<TMessage> queueProperties)
+    private async Task SetupAsync()
     {
         using var scope = serviceScopeFactory.CreateScope();
         var channelProvider = scope.ServiceProvider.GetRequiredService<IChannelProvider>();
-        var queueSetup = scope.ServiceProvider.GetRequiredService<IQueueSetup>();
 
         var channel = await channelProvider.GetChannelAsync();
 
-        await queueSetup.CreateQueueAsync(channel, queueProperties);
+        await queueSetup.CreateQueueAsync(channel, _queueProperties);
         await channelProvider.CloseChannelAsync();
     }
 
-    private async Task StartConsumerAsync(QueueProperties<TMessage> queueProperties,
-                                          CancellationToken cancellationToken)
+    private async Task StartConsumerAsync(CancellationToken cancellationToken)
     {
         using var scope = serviceScopeFactory.CreateScope();
-        var consumerProvider = scope.ServiceProvider.GetRequiredService<IConsumerProvider>();
-
         var messageHandler = scope.ServiceProvider.GetRequiredService<IMessageHandler<TMessage>>();
-        var consumer = await consumerProvider.CreateConsumerAsync(messageHandler, queueProperties);
+        var channelProvider = scope.ServiceProvider.GetRequiredService<IChannelProvider>();
+        var channel = await channelProvider.GetChannelAsync(_queueProperties.PrefetchCount);
+        var consumer = await consumerProvider.CreateConsumerAsync(channel, messageHandler, _queueProperties);
 
-        await consumer.Channel.BasicConsumeAsync(queue: queueProperties.QueueName,
-                                                 autoAck: false,
-                                                 consumerTag: $"consumer-{Guid.NewGuid()}",
-                                                 noLocal: false,
-                                                 exclusive: false,
-                                                 arguments: null,
-                                                 consumer: consumer,
-                                                 cancellationToken: cancellationToken);
+        await channel.BasicConsumeAsync(queue: _queueProperties.QueueName,
+                                        autoAck: false,
+                                        consumerTag: $"consumer-{Guid.NewGuid()}",
+                                        noLocal: false,
+                                        exclusive: false,
+                                        arguments: null,
+                                        consumer: consumer,
+                                        cancellationToken: cancellationToken);
 
-        logger.LogInformation("Started consuming messages from queue {QueueName}", queueProperties.QueueName);
+        logger.LogInformation("Started consuming messages from queue {QueueName}", _queueProperties.QueueName);
 
         while (!cancellationToken.IsCancellationRequested)
         {
-            logger.LogDebug("Consumer on queue {QueueName} is active", queueProperties.QueueName);
+            logger.LogDebug("Consumer on queue {QueueName} is active", _queueProperties.QueueName);
             await Task.Delay(DelayIntervalMs, cancellationToken);
         }
+
+        await channelProvider.CloseChannelAsync();
+        logger.LogInformation("Stopped consuming messages from queue {QueueName}", _queueProperties.QueueName);
     }
 }

@@ -11,8 +11,8 @@ public static class ConsumerExtensions
 {
     internal static IServiceCollection AddConsumersManagement(this IServiceCollection services)
     {
-        services.AddScoped<IConsumerProvider, ConsumerProvider>()
-                .AddScoped<IQueueSetup, QueueSetup>();
+        services.AddSingleton<IConsumerProvider, ConsumerProvider>()
+                .AddSingleton<IQueueSetup, QueueSetup>();
 
         return services;
     }

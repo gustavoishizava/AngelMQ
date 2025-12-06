@@ -1,4 +1,3 @@
-using AngelMQ.Channels;
 using AngelMQ.Messages;
 using AngelMQ.Messages.Errors;
 using AngelMQ.Properties;
@@ -9,14 +8,13 @@ using RabbitMQ.Client.Events;
 namespace AngelMQ.Consumers;
 
 public sealed class ConsumerProvider(ILogger<ConsumerProvider> logger,
-                                     IChannelProvider channelProvider,
                                      IMessageErrorHandler messageErrorHandler) : IConsumerProvider
 {
-    public async Task<AsyncDefaultBasicConsumer> CreateConsumerAsync<TMessage>(IMessageHandler<TMessage> messageHandler,
-                                                                               QueueProperties<TMessage> queueProperties)
-                                                                               where TMessage : class
+    public async Task<AsyncDefaultBasicConsumer> CreateConsumerAsync<TMessage>(
+        IChannel channel,
+        IMessageHandler<TMessage> messageHandler,
+        QueueProperties<TMessage> queueProperties) where TMessage : class
     {
-        var channel = await channelProvider.GetChannelAsync(queueProperties.PrefetchCount);
         return BuildConsumer(channel, messageHandler, queueProperties);
     }
 

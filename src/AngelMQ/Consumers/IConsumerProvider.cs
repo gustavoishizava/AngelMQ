@@ -6,7 +6,9 @@ namespace AngelMQ.Consumers;
 
 public interface IConsumerProvider
 {
-    Task<AsyncDefaultBasicConsumer> CreateConsumerAsync<TMessage>(IMessageHandler<TMessage> messageHandler,
-                                                                  QueueProperties<TMessage> queueProperties)
-                                                                  where TMessage : class;
+    Task<AsyncDefaultBasicConsumer> CreateConsumerAsync<TMessage>(
+        IChannel channel,
+        IMessageHandler<TMessage> messageHandler,
+        QueueProperties<TMessage> queueProperties)
+        where TMessage : class;
 }
