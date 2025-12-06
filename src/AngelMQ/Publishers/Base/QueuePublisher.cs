@@ -6,12 +6,13 @@ using RabbitMQ.Client;
 
 namespace AngelMQ.Publishers.Base;
 
-public abstract class QueuePublisher<TMessage> : PublisherBase<TMessage> where TMessage : class
+public abstract class QueuePublisher<TMessage>
+    : PublisherBase<TMessage, QueueProperties> where TMessage : class
 {
-    public QueuePublisher(ILogger<PublisherBase<TMessage>> logger,
+    public QueuePublisher(ILogger<PublisherBase<TMessage, QueueProperties>> logger,
                           IChannelPool channelPool,
                           IMessagePublisher messagePublisher,
-                          IOptions<PublisherProperties<TMessage>> options)
+                          IOptions<PublisherProperties<TMessage, QueueProperties>> options)
                           : base(logger, channelPool, messagePublisher, options)
     {
     }
@@ -21,7 +22,7 @@ public abstract class QueuePublisher<TMessage> : PublisherBase<TMessage> where T
         if (!properties.IsQueuePublisher)
             throw new InvalidOperationException("PublisherProperties does not contain Queue properties.");
 
-        var queue = properties.Queue!;
+        var queue = properties.Configuration;
         queue.Validate();
 
         logger.LogInformation("Creating queue {QueueName}.", queue.Name);
@@ -37,7 +38,7 @@ public abstract class QueuePublisher<TMessage> : PublisherBase<TMessage> where T
 
     protected override Task SendAsync(TMessage message, IDictionary<string, string>? headers = null)
     {
-        var queueName = properties.Queue!.Name;
+        var queueName = properties.Configuration.Name;
 
         return messagePublisher.PublishAsync(message, string.Empty, queueName, headers);
     }

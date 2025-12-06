@@ -16,7 +16,7 @@ public static class PublisherExtensions
 
     public static IServiceCollection AddExchangePublisher<TMessage, TExchangePublisher>(
         this IServiceCollection services,
-        Action<PublisherProperties<TMessage>> configure)
+        Action<PublisherProperties<TMessage, ExchangeProperties>> configure)
         where TMessage : class
         where TExchangePublisher : ExchangePublisher<TMessage>
     {
@@ -28,7 +28,7 @@ public static class PublisherExtensions
 
     public static IServiceCollection AddQueuePublisher<TMessage, TQueuePublisher>(
         this IServiceCollection services,
-        Action<PublisherProperties<TMessage>> configure)
+        Action<PublisherProperties<TMessage, QueueProperties>> configure)
         where TMessage : class
         where TQueuePublisher : QueuePublisher<TMessage>
     {

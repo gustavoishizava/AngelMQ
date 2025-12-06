@@ -6,14 +6,16 @@ using RabbitMQ.Client;
 
 namespace AngelMQ.Publishers.Base;
 
-public abstract class PublisherBase<TMessage>(ILogger<PublisherBase<TMessage>> logger,
-                                              IChannelPool channelPool,
-                                              IMessagePublisher messagePublisher,
-                                              IOptions<PublisherProperties<TMessage>> options)
-                                              : IPublisher<TMessage> where TMessage : class
+public abstract class PublisherBase<TMessage, TPublisherProps>(
+    ILogger<PublisherBase<TMessage, TPublisherProps>> logger,
+    IChannelPool channelPool,
+    IMessagePublisher messagePublisher,
+    IOptions<PublisherProperties<TMessage, TPublisherProps>> options) : IPublisher<TMessage>
+        where TMessage : class
+        where TPublisherProps : BasePublisherProperties, new()
 {
-    protected readonly ILogger<PublisherBase<TMessage>> logger = logger;
-    protected readonly PublisherProperties<TMessage> properties = options.Value;
+    protected readonly ILogger<PublisherBase<TMessage, TPublisherProps>> logger = logger;
+    protected readonly PublisherProperties<TMessage, TPublisherProps> properties = options.Value;
     protected readonly IMessagePublisher messagePublisher = messagePublisher;
 
     private bool _created = false;

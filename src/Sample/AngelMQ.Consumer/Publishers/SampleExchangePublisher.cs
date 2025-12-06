@@ -9,10 +9,10 @@ namespace AngelMQ.Consumer.Publishers;
 
 public sealed class SampleExchangePublisher : ExchangePublisher<SampleMessage>
 {
-    public SampleExchangePublisher(ILogger<PublisherBase<SampleMessage>> logger,
+    public SampleExchangePublisher(ILogger<SampleExchangePublisher> logger,
                                    IChannelPool channelPool,
                                    IMessagePublisher messagePublisher,
-                                   IOptions<PublisherProperties<SampleMessage>> options)
+                                   IOptions<PublisherProperties<SampleMessage, ExchangeProperties>> options)
                                    : base(logger, channelPool, messagePublisher, options)
     {
     }

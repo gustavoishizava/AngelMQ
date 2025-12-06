@@ -6,12 +6,13 @@ using RabbitMQ.Client;
 
 namespace AngelMQ.Publishers.Base;
 
-public abstract class ExchangePublisher<TMessage> : PublisherBase<TMessage> where TMessage : class
+public abstract class ExchangePublisher<TMessage>
+    : PublisherBase<TMessage, ExchangeProperties> where TMessage : class
 {
-    protected ExchangePublisher(ILogger<PublisherBase<TMessage>> logger,
+    protected ExchangePublisher(ILogger<PublisherBase<TMessage, ExchangeProperties>> logger,
                                 IChannelPool channelPool,
                                 IMessagePublisher messagePublisher,
-                                IOptions<PublisherProperties<TMessage>> options)
+                                IOptions<PublisherProperties<TMessage, ExchangeProperties>> options)
         : base(logger, channelPool, messagePublisher, options)
     {
     }
@@ -21,10 +22,10 @@ public abstract class ExchangePublisher<TMessage> : PublisherBase<TMessage> wher
         if (!properties.IsExchangePublisher)
             throw new InvalidOperationException("PublisherProperties does not contain Exchange properties.");
 
-        var exchange = properties.Exchange!;
+        var exchange = properties.Configuration;
         exchange.Validate();
 
-        logger.LogInformation("Creating exchange {ExchangeName}.", exchange.Name);
+        logger.LogInformation("Creating exchange {ExchangeName}.", exchange);
 
         await channel.ExchangeDeclareAsync(exchange: exchange.Name,
                                            type: exchange.Type,
@@ -38,7 +39,7 @@ public abstract class ExchangePublisher<TMessage> : PublisherBase<TMessage> wher
     protected override Task SendAsync(TMessage message,
                                       IDictionary<string, string>? headers = null)
     {
-        var exchangeName = properties.Exchange!.Name;
+        var exchangeName = properties.Configuration.Name;
         var routingKey = BuildRoutingKey(message, headers);
 
         return messagePublisher.PublishAsync(message, exchangeName, routingKey, headers);

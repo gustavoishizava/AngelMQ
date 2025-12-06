@@ -1,10 +1,8 @@
-using System.Collections;
 using AngelMQ.Consumer.Listeners.Handlers;
 using AngelMQ.Consumer.Listeners.Messages;
 using AngelMQ.Consumer.Publishers;
 using AngelMQ.Consumer.Workers;
 using AngelMQ.Extensions;
-using AngelMQ.Properties.Publishers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,30 +31,17 @@ builder.Services.AddConsumer<SampleMessageHandler, SampleMessage>(queueProps =>
 });
 
 
-builder.Services.AddExchangePublisher<SampleMessage, SampleExchangePublisher>(exchangeProps =>
+builder.Services.AddExchangePublisher<SampleMessage, SampleExchangePublisher>(props =>
 {
-    exchangeProps.SetExchange(new ExchangeProperties
-    {
-        Name = "notification.exchange",
-        Type = "topic",
-        Durable = true,
-        AutoDelete = false
-    });
-
-    exchangeProps.AutoCreate = true;
+    props.Configuration.Name = "accounts.exchange";
+    props.Configuration.Type = "topic";
+    props.AutoCreate = true;
 });
 
-builder.Services.AddQueuePublisher<QueueMessage, SampleQueuePublisher>(queueProps =>
+builder.Services.AddQueuePublisher<QueueMessage, SampleQueuePublisher>(props =>
 {
-    queueProps.SetQueue(new QueueProperties
-    {
-        Name = "notifications.queue",
-        Durable = true,
-        Exclusive = false,
-        AutoDelete = false
-    });
-
-    queueProps.AutoCreate = true;
+    props.Configuration.Name = "notifications.queue";
+    props.AutoCreate = true;
 });
 
 builder.Services.AddHostedService<ProducerWorker>();
