@@ -57,6 +57,7 @@ public abstract class PublisherBase<TMessage>(ILogger<PublisherBase<TMessage>> l
         try
         {
             await SetupAsync(channel);
+            _created = true;
         }
         catch (Exception ex)
         {
