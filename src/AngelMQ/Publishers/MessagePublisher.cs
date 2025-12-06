@@ -1,7 +1,6 @@
 using System.Net.Mime;
 using System.Text;
 using System.Text.Json;
-using AngelMQ.Channels;
 using AngelMQ.Channels.Pool;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
