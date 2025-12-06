@@ -26,26 +26,21 @@ builder.Services.AddConsumer<SampleMessageHandler, SampleMessage>(queueProps =>
     queueProps.RoutingKeys = ["create.#", "update.#"];
     queueProps.DeadLetter.Enabled = true;
     queueProps.ParkingLot.Enabled = true;
-    queueProps.ConsumerCount = 2;
+    queueProps.ConsumerCount = 10;
     queueProps.PrefetchCount = 250;
-});
-
-builder.Services.AddConsumer<QueueHandler, QueueMessage>(queueProps =>
+}).AddConsumer<QueueHandler, QueueMessage>(queueProps =>
 {
     queueProps.QueueName = "notifications";
     queueProps.ConsumerCount = 1;
-    queueProps.PrefetchCount = 250;
+    queueProps.PrefetchCount = 100;
 });
-
 
 builder.Services.AddExchangePublisher<SampleMessage, SampleExchangePublisher>(props =>
 {
     props.Configuration.Name = "accounts.exchange";
     props.Configuration.Type = "topic";
     props.AutoCreate = true;
-});
-
-builder.Services.AddQueuePublisher<QueueMessage, SampleQueuePublisher>(props =>
+}).AddQueuePublisher<QueueMessage, SampleQueuePublisher>(props =>
 {
     props.Configuration.Name = "notifications";
     props.AutoCreate = true;
