@@ -1,6 +1,6 @@
-using AngelMQ.Properties;
+using AngelMQ.Properties.Consumers;
 
-namespace AngelMQ.UnitTests.Properties;
+namespace AngelMQ.UnitTests.Properties.Consumers;
 
 public class ParkingLotPropertiesTests
 {

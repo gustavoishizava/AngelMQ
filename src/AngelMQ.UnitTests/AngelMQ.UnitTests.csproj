@@ -22,6 +22,5 @@
   <ItemGroup>
     <Folder Include="Channels/" />
     <Folder Include="Connections/" />
-    <Folder Include="Properties/" />
   </ItemGroup>
 </Project>
