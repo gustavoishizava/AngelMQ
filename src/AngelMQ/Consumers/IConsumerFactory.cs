@@ -4,9 +4,9 @@ using RabbitMQ.Client;
 
 namespace AngelMQ.Consumers;
 
-public interface IConsumerProvider
+public interface IConsumerFactory
 {
-    Task<AsyncDefaultBasicConsumer> CreateConsumerAsync<TMessage>(
+    Task<AsyncDefaultBasicConsumer> CreateAsync<TMessage>(
         IChannel channel,
         IMessageHandler<TMessage> messageHandler,
         QueueProperties<TMessage> queueProperties)

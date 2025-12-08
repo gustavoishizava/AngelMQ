@@ -7,10 +7,10 @@ using RabbitMQ.Client.Events;
 
 namespace AngelMQ.Consumers;
 
-public sealed class ConsumerProvider(ILogger<ConsumerProvider> logger,
-                                     IMessageErrorHandler messageErrorHandler) : IConsumerProvider
+public sealed class ConsumerFactory(ILogger<ConsumerFactory> logger,
+                                    IMessageErrorHandler messageErrorHandler) : IConsumerFactory
 {
-    public async Task<AsyncDefaultBasicConsumer> CreateConsumerAsync<TMessage>(
+    public async Task<AsyncDefaultBasicConsumer> CreateAsync<TMessage>(
         IChannel channel,
         IMessageHandler<TMessage> messageHandler,
         QueueProperties<TMessage> queueProperties) where TMessage : class
