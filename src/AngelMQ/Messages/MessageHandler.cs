@@ -5,7 +5,8 @@ using RabbitMQ.Client.Events;
 
 namespace AngelMQ.Messages;
 
-public abstract class MessageHandler<TMessage>(ILogger<MessageHandler<TMessage>> logger) : IMessageHandler<TMessage> where TMessage : class
+public abstract class MessageHandler<TMessage>(ILogger<MessageHandler<TMessage>> logger)
+    : IMessageHandler<TMessage> where TMessage : class
 {
     private readonly JsonSerializerOptions _defaultSerializerOptions = new()
     {
