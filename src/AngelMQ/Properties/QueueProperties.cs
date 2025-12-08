@@ -1,3 +1,5 @@
+using AngelMQ.Properties.Consumers;
+
 namespace AngelMQ.Properties;
 
 public sealed class QueueProperties<TMessage> where TMessage : class

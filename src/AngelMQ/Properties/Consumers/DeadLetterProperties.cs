@@ -1,6 +1,6 @@
 using AngelMQ.Constants;
 
-namespace AngelMQ.Properties;
+namespace AngelMQ.Properties.Consumers;
 
 public sealed class DeadLetterProperties
 {
