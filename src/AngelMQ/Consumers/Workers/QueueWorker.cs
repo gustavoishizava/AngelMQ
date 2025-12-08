@@ -11,7 +11,7 @@ namespace AngelMQ.Consumers.Workers;
 
 public sealed class QueueWorker<TMessage>(ILogger<QueueWorker<TMessage>> logger,
                                           IServiceScopeFactory serviceScopeFactory,
-                                          IQueueSetup queueSetup,
+                                          IQueueFactory queueFactory,
                                           IConsumerFactory consumerFactory,
                                           IOptions<QueueProperties<TMessage>> options)
                                           : BackgroundService
@@ -54,7 +54,7 @@ public sealed class QueueWorker<TMessage>(ILogger<QueueWorker<TMessage>> logger,
 
         var channel = await channelProvider.GetAsync();
 
-        await queueSetup.CreateQueueAsync(channel, _queueProperties);
+        await queueFactory.CreateAsync(channel, _queueProperties);
         await channelProvider.CloseAsync();
     }
 
@@ -64,7 +64,7 @@ public sealed class QueueWorker<TMessage>(ILogger<QueueWorker<TMessage>> logger,
         var messageHandler = scope.ServiceProvider.GetRequiredService<IMessageHandler<TMessage>>();
         var channelProvider = scope.ServiceProvider.GetRequiredService<IChannelProvider>();
         var channel = await channelProvider.GetAsync(_queueProperties.PrefetchCount);
-        var consumer = await consumerFactory.CreateAsync(channel, messageHandler, _queueProperties);
+        var consumer = consumerFactory.Create(channel, messageHandler, _queueProperties);
 
         await channel.BasicConsumeAsync(queue: _queueProperties.QueueName,
                                         autoAck: false,

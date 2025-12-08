@@ -6,7 +6,7 @@ namespace AngelMQ.Consumers;
 
 public interface IConsumerFactory
 {
-    Task<AsyncDefaultBasicConsumer> CreateAsync<TMessage>(
+    AsyncDefaultBasicConsumer Create<TMessage>(
         IChannel channel,
         IMessageHandler<TMessage> messageHandler,
         QueueProperties<TMessage> queueProperties)

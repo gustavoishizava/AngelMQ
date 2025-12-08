@@ -10,7 +10,7 @@ namespace AngelMQ.Consumers;
 public sealed class ConsumerFactory(ILogger<ConsumerFactory> logger,
                                     IMessageErrorHandler messageErrorHandler) : IConsumerFactory
 {
-    public async Task<AsyncDefaultBasicConsumer> CreateAsync<TMessage>(
+    public AsyncDefaultBasicConsumer Create<TMessage>(
         IChannel channel,
         IMessageHandler<TMessage> messageHandler,
         QueueProperties<TMessage> queueProperties) where TMessage : class
