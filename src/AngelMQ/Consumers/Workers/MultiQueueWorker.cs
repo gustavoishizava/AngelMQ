@@ -1,7 +1,7 @@
 using AngelMQ.Channels;
 using AngelMQ.Consumers.Workers.Abstractions;
 using AngelMQ.Messages;
-using AngelMQ.Properties;
+using AngelMQ.Properties.Consumers;
 using AngelMQ.Queues;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

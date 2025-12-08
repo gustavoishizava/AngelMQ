@@ -1,4 +1,4 @@
-using AngelMQ.Properties;
+using AngelMQ.Properties.Consumers;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 

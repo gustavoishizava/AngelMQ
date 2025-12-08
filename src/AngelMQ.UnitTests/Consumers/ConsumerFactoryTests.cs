@@ -1,6 +1,6 @@
 using AngelMQ.Consumers;
 using AngelMQ.Messages;
-using AngelMQ.Properties;
+using AngelMQ.Properties.Consumers;
 using Moq;
 using Moq.AutoMock;
 using RabbitMQ.Client;

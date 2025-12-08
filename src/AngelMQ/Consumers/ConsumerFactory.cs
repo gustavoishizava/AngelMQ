@@ -1,6 +1,6 @@
 using AngelMQ.Messages;
 using AngelMQ.Messages.Errors;
-using AngelMQ.Properties;
+using AngelMQ.Properties.Consumers;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;

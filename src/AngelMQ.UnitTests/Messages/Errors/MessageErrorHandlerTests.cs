@@ -1,7 +1,7 @@
 using System.Text;
 using AngelMQ.Constants;
 using AngelMQ.Messages.Errors;
-using AngelMQ.Properties;
+using AngelMQ.Properties.Consumers;
 using AngelMQ.Publishers;
 using Moq;
 using Moq.AutoMock;

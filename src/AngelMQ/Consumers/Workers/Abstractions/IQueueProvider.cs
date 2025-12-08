@@ -1,4 +1,4 @@
-using AngelMQ.Properties;
+using AngelMQ.Properties.Consumers;
 
 namespace AngelMQ.Consumers.Workers.Abstractions;
 

@@ -1,5 +1,5 @@
 using AngelMQ.Constants;
-using AngelMQ.Properties;
+using AngelMQ.Properties.Consumers;
 using AngelMQ.Queues;
 using Moq;
 using Moq.AutoMock;

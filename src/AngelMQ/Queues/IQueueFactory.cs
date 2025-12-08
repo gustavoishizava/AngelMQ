@@ -1,4 +1,4 @@
-using AngelMQ.Properties;
+using AngelMQ.Properties.Consumers;
 using RabbitMQ.Client;
 
 namespace AngelMQ.Queues;

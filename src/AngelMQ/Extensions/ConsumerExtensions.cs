@@ -2,7 +2,7 @@ using AngelMQ.Consumers;
 using AngelMQ.Consumers.Workers;
 using AngelMQ.Consumers.Workers.Abstractions;
 using AngelMQ.Messages;
-using AngelMQ.Properties;
+using AngelMQ.Properties.Consumers;
 using AngelMQ.Queues;
 using Microsoft.Extensions.DependencyInjection;
 

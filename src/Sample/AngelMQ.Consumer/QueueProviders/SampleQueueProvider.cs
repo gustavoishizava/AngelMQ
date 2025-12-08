@@ -1,6 +1,6 @@
 using AngelMQ.Consumer.Listeners.Messages;
 using AngelMQ.Consumers.Workers.Abstractions;
-using AngelMQ.Properties;
+using AngelMQ.Properties.Consumers;
 
 namespace AngelMQ.Consumer.QueueProviders;
 
