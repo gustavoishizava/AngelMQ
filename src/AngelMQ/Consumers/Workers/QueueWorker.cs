@@ -52,10 +52,10 @@ public sealed class QueueWorker<TMessage>(ILogger<QueueWorker<TMessage>> logger,
         using var scope = serviceScopeFactory.CreateScope();
         var channelProvider = scope.ServiceProvider.GetRequiredService<IChannelProvider>();
 
-        var channel = await channelProvider.GetChannelAsync();
+        var channel = await channelProvider.GetAsync();
 
         await queueSetup.CreateQueueAsync(channel, _queueProperties);
-        await channelProvider.CloseChannelAsync();
+        await channelProvider.CloseAsync();
     }
 
     private async Task StartConsumerAsync(CancellationToken cancellationToken)
@@ -63,7 +63,7 @@ public sealed class QueueWorker<TMessage>(ILogger<QueueWorker<TMessage>> logger,
         using var scope = serviceScopeFactory.CreateScope();
         var messageHandler = scope.ServiceProvider.GetRequiredService<IMessageHandler<TMessage>>();
         var channelProvider = scope.ServiceProvider.GetRequiredService<IChannelProvider>();
-        var channel = await channelProvider.GetChannelAsync(_queueProperties.PrefetchCount);
+        var channel = await channelProvider.GetAsync(_queueProperties.PrefetchCount);
         var consumer = await consumerFactory.CreateAsync(channel, messageHandler, _queueProperties);
 
         await channel.BasicConsumeAsync(queue: _queueProperties.QueueName,
@@ -83,7 +83,7 @@ public sealed class QueueWorker<TMessage>(ILogger<QueueWorker<TMessage>> logger,
             await Task.Delay(DelayIntervalMs, cancellationToken);
         }
 
-        await channelProvider.CloseChannelAsync();
+        await channelProvider.CloseAsync();
         logger.LogInformation("Stopped consuming messages from queue {QueueName}", _queueProperties.QueueName);
     }
 }

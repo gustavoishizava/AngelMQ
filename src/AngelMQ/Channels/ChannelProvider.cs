@@ -12,7 +12,7 @@ public sealed class ChannelProvider(ILogger<ChannelProvider> logger,
 {
     private IChannel? _channel;
 
-    public async Task CloseChannelAsync()
+    public async Task CloseAsync()
     {
         if (_channel is null)
             return;
@@ -20,7 +20,7 @@ public sealed class ChannelProvider(ILogger<ChannelProvider> logger,
         await _channel.CloseAsync();
     }
 
-    public async Task<IChannel> GetChannelAsync(ushort prefetchCount = 1)
+    public async Task<IChannel> GetAsync(ushort prefetchCount = 1)
     {
         if (_channel is not null)
             return _channel;

@@ -16,7 +16,7 @@ public class ChannelProviderTests
     }
 
     [Fact]
-    public async Task GetChannelAsync_WhenCalledFirstTime_ShouldCreateNewChannel()
+    public async Task GetAsync_WhenCalledFirstTime_ShouldCreateNewChannel()
     {
         // Arrange
         var connectionMock = new Mock<IConnection>();
@@ -33,7 +33,7 @@ public class ChannelProviderTests
         var provider = _mocker.CreateInstance<ChannelProvider>();
 
         // Act
-        var result = await provider.GetChannelAsync(10);
+        var result = await provider.GetAsync(10);
 
         // Assert
         Assert.Equal(channelMock.Object, result);
@@ -47,7 +47,7 @@ public class ChannelProviderTests
     }
 
     [Fact]
-    public async Task GetChannelAsync_WhenCalledMultipleTimes_ShouldReturnSameChannel()
+    public async Task GetAsync_WhenCalledMultipleTimes_ShouldReturnSameChannel()
     {
         // Arrange
         var connectionMock = new Mock<IConnection>();
@@ -64,8 +64,8 @@ public class ChannelProviderTests
         var provider = _mocker.CreateInstance<ChannelProvider>();
 
         // Act
-        var result1 = await provider.GetChannelAsync(10);
-        var result2 = await provider.GetChannelAsync(20);
+        var result1 = await provider.GetAsync(10);
+        var result2 = await provider.GetAsync(20);
 
         // Assert
         Assert.Equal(channelMock.Object, result1);
@@ -81,7 +81,7 @@ public class ChannelProviderTests
     }
 
     [Fact]
-    public async Task CloseChannelAsync_WhenChannelExists_ShouldCloseChannel()
+    public async Task CloseAsync_WhenChannelExists_ShouldCloseChannel()
     {
         // Arrange
         var connectionMock = new Mock<IConnection>();
@@ -96,10 +96,10 @@ public class ChannelProviderTests
             .ReturnsAsync(channelMock.Object);
 
         var provider = _mocker.CreateInstance<ChannelProvider>();
-        await provider.GetChannelAsync();
+        await provider.GetAsync();
 
         // Act
-        await provider.CloseChannelAsync();
+        await provider.CloseAsync();
 
         // Assert
         channelMock.Verify(x => x.CloseAsync(It.IsAny<ushort>(),
@@ -109,12 +109,12 @@ public class ChannelProviderTests
     }
 
     [Fact]
-    public async Task CloseChannelAsync_WhenChannelDoesNotExist_ShouldNotThrow()
+    public async Task CloseAsync_WhenChannelDoesNotExist_ShouldNotThrow()
     {
         // Arrange
         var provider = _mocker.CreateInstance<ChannelProvider>();
 
         // Act & Assert
-        await provider.CloseChannelAsync();
+        await provider.CloseAsync();
     }
 }
