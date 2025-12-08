@@ -8,22 +8,6 @@ public sealed class SampleQueueProvider : IQueueProvider<SampleMessage>
 {
     public Task<List<QueueProperties<SampleMessage>>> GetQueuePropertiesAsync()
     {
-        var @default = new QueueProperties<SampleMessage>
-        {
-            QueueName = "accounts",
-            Exchange = new ExchangeProperties
-            {
-                Name = "accounts.exchange",
-                Type = "topic",
-                AutoCreate = false
-            },
-            RoutingKeys = ["#"],
-            ConsumerCount = 20,
-            PrefetchCount = 250
-        };
-        @default.DeadLetter.Enabled = true;
-        @default.ParkingLot.Enabled = true;
-
         var br = new QueueProperties<SampleMessage>
         {
             QueueName = "br.accounts",
@@ -58,7 +42,6 @@ public sealed class SampleQueueProvider : IQueueProvider<SampleMessage>
 
         return Task.FromResult(new List<QueueProperties<SampleMessage>>
         {
-            @default,
             br,
             mx
         });
