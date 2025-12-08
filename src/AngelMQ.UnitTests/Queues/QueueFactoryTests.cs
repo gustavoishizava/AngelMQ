@@ -20,8 +20,7 @@ public class QueueFactoryTests
         _queueProperties = new QueueProperties<TestMessage>
         {
             QueueName = "test-queue",
-            ExchangeName = "test-exchange",
-            ExchangeType = "topic",
+            Exchange = { Name = "test-exchange", Type = "topic" },
             RoutingKeys = ["test.routing.key"]
         };
     }

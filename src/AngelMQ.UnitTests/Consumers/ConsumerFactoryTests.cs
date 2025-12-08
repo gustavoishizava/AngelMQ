@@ -22,7 +22,7 @@ public class ConsumerFactoryTests
         _queueProperties = new QueueProperties<TestMessage>
         {
             QueueName = "test-queue",
-            ExchangeName = "test-exchange"
+            Exchange = { Name = "test-exchange" }
         };
     }
 

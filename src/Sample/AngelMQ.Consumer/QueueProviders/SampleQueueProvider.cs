@@ -11,10 +11,14 @@ public sealed class SampleQueueProvider : IQueueProvider<SampleMessage>
         var @default = new QueueProperties<SampleMessage>
         {
             QueueName = "accounts",
-            ExchangeName = "accounts.exchange",
+            Exchange = new ExchangeProperties
+            {
+                Name = "accounts.exchange",
+                Type = "topic",
+                AutoCreate = false
+            },
             RoutingKeys = ["#"],
             ConsumerCount = 20,
-            ExchangeType = "topic",
             PrefetchCount = 250
         };
         @default.DeadLetter.Enabled = true;
@@ -23,10 +27,14 @@ public sealed class SampleQueueProvider : IQueueProvider<SampleMessage>
         var br = new QueueProperties<SampleMessage>
         {
             QueueName = "br.accounts",
-            ExchangeName = "accounts.exchange",
+            Exchange = new ExchangeProperties
+            {
+                Name = "accounts.exchange",
+                Type = "topic",
+                AutoCreate = false
+            },
             RoutingKeys = ["br.*"],
             ConsumerCount = 10,
-            ExchangeType = "topic",
             PrefetchCount = 250
         };
         br.DeadLetter.Enabled = true;
@@ -35,10 +43,14 @@ public sealed class SampleQueueProvider : IQueueProvider<SampleMessage>
         var mx = new QueueProperties<SampleMessage>
         {
             QueueName = "mx.accounts",
-            ExchangeName = "accounts.exchange",
+            Exchange = new ExchangeProperties
+            {
+                Name = "accounts.exchange",
+                Type = "topic",
+                AutoCreate = false
+            },
             RoutingKeys = ["mx.*"],
             ConsumerCount = 10,
-            ExchangeType = "topic",
             PrefetchCount = 250
         };
         mx.DeadLetter.Enabled = true;

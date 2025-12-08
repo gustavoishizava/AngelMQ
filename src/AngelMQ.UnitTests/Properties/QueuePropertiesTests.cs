@@ -13,7 +13,7 @@ public class QueuePropertiesTests
         var properties = new QueueProperties<object>
         {
             QueueName = queueName,
-            ExchangeName = exchangeName
+            Exchange = { Name = exchangeName }
         };
 
         // Act & Assert

@@ -23,7 +23,7 @@ public class MessageErrorHandlerTests
         _queueProperties = new QueueProperties<TestMessage>
         {
             QueueName = "test-queue",
-            ExchangeName = "test-exchange"
+            Exchange = { Name = "test-exchange" }
         };
         _queueProperties.ParkingLot.Enabled = true;
         _queueProperties.ParkingLot.SetMaxRetryAttempts(3);
