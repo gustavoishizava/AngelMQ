@@ -1,5 +1,6 @@
 using AngelMQ.Consumers;
 using AngelMQ.Consumers.Workers;
+using AngelMQ.Consumers.Workers.Abstractions;
 using AngelMQ.Messages;
 using AngelMQ.Properties;
 using AngelMQ.Queues;
@@ -26,6 +27,20 @@ public static class ConsumerExtensions
             .Configure(configureQueueProperties);
 
         services.AddHostedService<QueueWorker<TMessage>>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddConsumer<TQueueProvider, TMessageHandler, TMessage>(
+        this IServiceCollection services)
+        where TQueueProvider : class, IQueueProvider<TMessage>
+        where TMessageHandler : class, IMessageHandler<TMessage>
+        where TMessage : class
+    {
+        services.AddTransient<IMessageHandler<TMessage>, TMessageHandler>()
+                .AddSingleton<IQueueProvider<TMessage>, TQueueProvider>();
+
+        services.AddHostedService<MultiQueueWorker<TMessage>>();
 
         return services;
     }

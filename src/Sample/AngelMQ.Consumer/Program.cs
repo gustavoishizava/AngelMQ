@@ -1,7 +1,10 @@
 using AngelMQ.Consumer.Listeners.Handlers;
 using AngelMQ.Consumer.Listeners.Messages;
 using AngelMQ.Consumer.Publishers;
+using AngelMQ.Consumer.QueueProviders;
 using AngelMQ.Consumer.Workers;
+using AngelMQ.Consumers.Workers;
+using AngelMQ.Consumers.Workers.Abstractions;
 using AngelMQ.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,27 +16,27 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddRabbitMQ(options =>
 {
-    options.ConnectionFactory.ConsumerDispatchConcurrency = 10;
+    options.ConnectionFactory.ConsumerDispatchConcurrency = 50;
     options.ChannelPool.SetMaxSize(5);
     options.ChannelPool.SetTimeout(10000);
 });
 
-builder.Services.AddConsumer<SampleMessageHandler, SampleMessage>(queueProps =>
-{
-    queueProps.QueueName = "accounts";
-    queueProps.ExchangeName = "accounts.exchange";
-    queueProps.ExchangeType = "topic";
-    queueProps.RoutingKeys = ["create.#", "update.#"];
-    queueProps.DeadLetter.Enabled = true;
-    queueProps.ParkingLot.Enabled = true;
-    queueProps.ConsumerCount = 10;
-    queueProps.PrefetchCount = 250;
-}).AddConsumer<QueueHandler, QueueMessage>(queueProps =>
-{
-    queueProps.QueueName = "notifications";
-    queueProps.ConsumerCount = 1;
-    queueProps.PrefetchCount = 100;
-});
+// builder.Services.AddConsumer<SampleMessageHandler, SampleMessage>(queueProps =>
+// {
+//     queueProps.QueueName = "accounts";
+//     queueProps.ExchangeName = "accounts.exchange";
+//     queueProps.ExchangeType = "topic";
+//     queueProps.RoutingKeys = ["create.#", "update.#"];
+//     queueProps.DeadLetter.Enabled = true;
+//     queueProps.ParkingLot.Enabled = true;
+//     queueProps.ConsumerCount = 0;
+//     queueProps.PrefetchCount = 250;
+// }).AddConsumer<QueueHandler, QueueMessage>(queueProps =>
+// {
+//     queueProps.QueueName = "notifications";
+//     queueProps.ConsumerCount = 0;
+//     queueProps.PrefetchCount = 100;
+// });
 
 builder.Services.AddExchangePublisher<SampleMessage, SampleExchangePublisher>(props =>
 {
@@ -47,6 +50,7 @@ builder.Services.AddExchangePublisher<SampleMessage, SampleExchangePublisher>(pr
 });
 
 builder.Services.AddHostedService<ProducerWorker>();
+builder.Services.AddConsumer<SampleQueueProvider, SampleMessageHandler, SampleMessage>();
 
 var app = builder.Build();
 

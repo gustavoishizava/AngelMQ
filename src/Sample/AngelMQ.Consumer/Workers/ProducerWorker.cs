@@ -35,12 +35,14 @@ public class ProducerWorker : BackgroundService
 
             var task1 = _samplePublisher.PublishAsync(new SampleMessage
             {
-                Id = Random.Shared.Next(1, 1000)
+                Id = Random.Shared.Next(1, 1000),
+                Country = "br"
             });
 
-            var task2 = _queuePublisher.PublishAsync(new QueueMessage
+            var task2 = _samplePublisher.PublishAsync(new SampleMessage
             {
-                Id = Random.Shared.Next(1, 1000)
+                Id = Random.Shared.Next(1, 1000),
+                Country = "mx"
             });
 
             await Task.WhenAll(task1, task2);

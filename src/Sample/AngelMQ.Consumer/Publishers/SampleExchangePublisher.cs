@@ -19,6 +19,6 @@ public sealed class SampleExchangePublisher : ExchangePublisher<SampleMessage>
 
     protected override string BuildRoutingKey(SampleMessage message, IDictionary<string, string>? headers = null)
     {
-        return $"create.{message.Id}";
+        return $"{message.Country}.{message.Id}";
     }
 }
