@@ -1,6 +1,6 @@
 using RabbitMQ.Client;
 
-namespace AngelMQ.Properties;
+namespace AngelMQ.Properties.Consumers;
 
 public class ExchangeProperties
 {
