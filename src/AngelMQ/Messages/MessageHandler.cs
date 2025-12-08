@@ -37,7 +37,7 @@ public abstract class MessageHandler<TMessage>(ILogger<MessageHandler<TMessage>>
                                                     GetSerializerOptions());
     }
 
-    private IDictionary<string, string> ExtractHeaders(IReadOnlyBasicProperties properties)
+    private static Dictionary<string, string> ExtractHeaders(IReadOnlyBasicProperties properties)
     {
         var headers = new Dictionary<string, string>();
         if (properties.Headers is null)
