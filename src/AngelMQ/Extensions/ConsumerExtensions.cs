@@ -26,7 +26,7 @@ public static class ConsumerExtensions
         services.AddTransient<IMessageHandler<TMessage>, TMessageHandler>()
             .Configure(configureQueueProperties);
 
-        services.AddHostedService<QueueWorker<TMessage>>();
+        services.AddHostedService<SimpleQueueWorker<TMessage>>();
 
         return services;
     }

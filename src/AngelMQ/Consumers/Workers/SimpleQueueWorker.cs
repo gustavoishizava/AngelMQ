@@ -9,13 +9,14 @@ using Microsoft.Extensions.Options;
 
 namespace AngelMQ.Consumers.Workers;
 
-public sealed class QueueWorker<TMessage>(ILogger<QueueWorker<TMessage>> logger,
-                                          IServiceScopeFactory serviceScopeFactory,
-                                          IQueueFactory queueFactory,
-                                          IConsumerFactory consumerFactory,
-                                          IOptions<QueueProperties<TMessage>> options)
-                                          : BackgroundService
-                                          where TMessage : class
+public sealed class SimpleQueueWorker<TMessage>(
+    ILogger<SimpleQueueWorker<TMessage>> logger,
+    IServiceScopeFactory serviceScopeFactory,
+    IQueueFactory queueFactory,
+    IConsumerFactory consumerFactory,
+    IOptions<QueueProperties<TMessage>> options)
+    : BackgroundService
+    where TMessage : class
 {
     private readonly QueueProperties<TMessage> _queueProperties = options.Value;
     private const int DelayIntervalMs = 5000;
