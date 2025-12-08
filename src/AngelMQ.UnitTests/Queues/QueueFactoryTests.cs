@@ -188,6 +188,49 @@ public class QueueFactoryTests
             default), Times.Exactly(3));
     }
 
+    [Fact]
+    public async Task CreateAsync_WithAutoCreateFalse_ShouldNotCreateMainExchange()
+    {
+        // Arrange
+        _queueProperties.Exchange.AutoCreate = false;
+        _queueProperties.DeadLetter.Enabled = false;
+        _queueProperties.ParkingLot.Enabled = false;
+
+        var factory = _mocker.CreateInstance<QueueFactory>();
+
+        // Act
+        await factory.CreateAsync(_channelMock.Object, _queueProperties);
+
+        // Assert
+        _channelMock.Verify(x => x.ExchangeDeclareAsync(
+            "test-exchange",
+            It.IsAny<string>(),
+            It.IsAny<bool>(),
+            It.IsAny<bool>(),
+            It.IsAny<IDictionary<string, object?>>(),
+            It.IsAny<bool>(),
+            It.IsAny<bool>(),
+            default), Times.Never);
+
+        _channelMock.Verify(x => x.QueueDeclareAsync(
+            "test-queue",
+            true,
+            false,
+            false,
+            It.IsAny<IDictionary<string, object?>>(),
+            false,
+            false,
+            default), Times.Once);
+
+        _channelMock.Verify(x => x.QueueBindAsync(
+            "test-queue",
+            "test-exchange",
+            "test.routing.key",
+            null,
+            false,
+            default), Times.Once);
+    }
+
     public class TestMessage
     {
         public int Id { get; set; }

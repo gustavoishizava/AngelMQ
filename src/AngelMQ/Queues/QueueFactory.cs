@@ -27,9 +27,12 @@ public sealed class QueueFactory(ILogger<QueueFactory> logger) : IQueueFactory
         if (queueProperties.DeadLetter.Enabled)
             arguments.Add(MessageHeaders.DeadLetterExchange, queueProperties.DeadLetterExchangeName);
 
-        await CreateExchangeAsync(channel,
-                                  queueProperties.ExchangeName,
-                                  queueProperties.ExchangeType);
+        if (queueProperties.Exchange.AutoCreate)
+        {
+            await CreateExchangeAsync(channel,
+                                      queueProperties.Exchange.Name,
+                                      queueProperties.Exchange.Type);
+        }
 
         await CreateQueueAsync(channel,
                                queueProperties.QueueName,
@@ -37,7 +40,7 @@ public sealed class QueueFactory(ILogger<QueueFactory> logger) : IQueueFactory
 
         await BindQueueAsync(channel,
                              queueProperties.QueueName,
-                             queueProperties.ExchangeName,
+                             queueProperties.Exchange.Name,
                              queueProperties.RoutingKeys);
     }
 
@@ -47,7 +50,7 @@ public sealed class QueueFactory(ILogger<QueueFactory> logger) : IQueueFactory
     {
         await CreateExchangeAsync(channel,
                                   queueProperties.DeadLetterExchangeName,
-                                  queueProperties.ExchangeType);
+                                  queueProperties.Exchange.Type);
 
         await CreateQueueAsync(channel, queueProperties.DeadLetterQueueName, null);
 
@@ -64,12 +67,12 @@ public sealed class QueueFactory(ILogger<QueueFactory> logger) : IQueueFactory
         var arguments = new Dictionary<string, object?>
         {
             { MessageHeaders.MessageTTL, queueProperties.ParkingLot.TTL },
-            { MessageHeaders.DeadLetterExchange, queueProperties.ExchangeName }
+            { MessageHeaders.DeadLetterExchange, queueProperties.Exchange.Name }
         };
 
         await CreateExchangeAsync(channel,
                                   queueProperties.ParkingLotExchangeName,
-                                  queueProperties.ExchangeType);
+                                  queueProperties.Exchange.Type);
 
         await CreateQueueAsync(channel,
                                queueProperties.ParkingLotQueueName,
