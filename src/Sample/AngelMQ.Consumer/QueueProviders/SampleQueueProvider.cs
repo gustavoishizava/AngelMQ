@@ -18,7 +18,7 @@ public sealed class SampleQueueProvider : IQueueProvider<SampleMessage>
                 AutoCreate = false
             },
             RoutingKeys = ["br.*"],
-            ConsumerCount = 10,
+            ConsumerCount = 2,
             PrefetchCount = 250
         };
         br.DeadLetter.Enabled = true;
@@ -34,7 +34,7 @@ public sealed class SampleQueueProvider : IQueueProvider<SampleMessage>
                 AutoCreate = false
             },
             RoutingKeys = ["mx.*"],
-            ConsumerCount = 10,
+            ConsumerCount = 1,
             PrefetchCount = 250
         };
         mx.DeadLetter.Enabled = true;

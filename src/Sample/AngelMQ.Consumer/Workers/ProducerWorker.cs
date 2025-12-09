@@ -21,7 +21,7 @@ public class ProducerWorker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var tasks = Enumerable.Range(0, 100)
+        var tasks = Enumerable.Range(0, 10)
                               .Select(_ => PublishAsync(stoppingToken)).ToList();
 
         await Task.WhenAll(tasks);
@@ -45,7 +45,12 @@ public class ProducerWorker : BackgroundService
                 Country = "mx"
             });
 
-            await Task.WhenAll(task1, task2);
+            var task3 = _queuePublisher.PublishAsync(new QueueMessage
+            {
+                Id = Random.Shared.Next(1, 1000)
+            });
+
+            await Task.WhenAll(task1, task2, task3);
 
             await Task.Delay(500, stoppingToken);
         }
