@@ -16,6 +16,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddRabbitMQ(options =>
 {
     options.ConnectionFactory.ConsumerDispatchConcurrency = 50;
+    options.ConnectionFactory.ClientProvidedName = "AngelMQ.Consumer.SampleApp";
     options.ChannelPool.SetMaxSize(5);
     options.ChannelPool.SetTimeout(10000);
 });
