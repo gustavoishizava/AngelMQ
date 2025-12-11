@@ -71,6 +71,7 @@ stages:
           runOnce:
             deploy:
               steps:
+                - checkout: self
                 - task: UseDotNet@2
                   displayName: 'Install .NET Core SDK'
                   inputs:
@@ -78,13 +79,13 @@ stages:
                     performMultiLevelLookup: true
                 - task: DotNetCoreCLI@2
                   displayName: 'Pack NuGet Package'
-                  env:
-                    PackageVersion: '$(Build.SourceBranchName)-preview$(previewCounter)'
                   inputs:
                     command: 'pack'
                     packagesToPack: '**/*.csproj'
                     versioningScheme: 'byEnvVar'
                     versionEnvVar: 'PackageVersion'
+                  env:
+                    PackageVersion: '$(Build.SourceBranchName)-preview$(previewCounter)'
                 - task: NuGetCommand@2
                   displayName: 'Push to NuGet.org'
                   inputs:
