@@ -19,7 +19,8 @@ variables:
   packageProject: '**/AngelMQ.csproj'
   unitTestPathPattern: '**/*UnitTests/*.csproj'
   previewCounter: $[counter(variables['Build.SourceBranchName'], 1)]
-  packageVersion: '$(Build.SourceBranchName)-preview$(previewCounter)'
+  packagePreviewVersion: '$(Build.SourceBranchName)-preview$(previewCounter)'
+  packageVersion: '$(Build.SourceBranchName)'
 
 stages:
   - stage: Build_and_Test
@@ -60,7 +61,7 @@ stages:
               summaryFileLocation: '$(Agent.TempDirectory)/**/coverage.cobertura.xml'
 
   - stage: NuGet_Pack_And_Push_Preview
-    displayName: 'NuGet Pack and Push Preview'
+    displayName: '(Preview) NuGet Pack and Push'
     dependsOn: Build_and_Test
     condition: succeeded()
     jobs:
@@ -69,6 +70,39 @@ stages:
         pool:
           vmImage: 'ubuntu-24.04'
         environment: 'NuGetPreview'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                - task: UseDotNet@2
+                  displayName: 'Install .NET Core SDK'
+                  inputs:
+                    version: '$(dotnetSdkVersion)'
+                    performMultiLevelLookup: true
+                - task: DotNetCoreCLI@2
+                  displayName: 'Pack NuGet Package'
+                  inputs:
+                    command: 'pack'
+                    packagesToPack: '$(packageProject)'
+                    versioningScheme: 'byEnvVar'
+                    versionEnvVar: 'PACKAGE_VERSION'
+                  env:
+                    PACKAGE_VERSION: '$(packagePreviewVersion)'
+                - script: |
+                    dotnet nuget push $(Build.ArtifactStagingDirectory)/*.nupkg --source https://api.nuget.org/v3/index.json --api-key $(NuGetApiKey) --skip-duplicate
+                  displayName: 'Push to NuGet.org'
+
+  - stage: NuGet_Pack_And_Push_Official
+    displayName: 'NuGet Pack and Push'
+    dependsOn: Build_and_Test
+    condition: succeeded()
+    jobs:
+      - deployment: Deploy
+        displayName: 'Pack and Push to NuGet'
+        pool:
+          vmImage: 'ubuntu-24.04'
+        environment: 'NuGetPush'
         strategy:
           runOnce:
             deploy:
