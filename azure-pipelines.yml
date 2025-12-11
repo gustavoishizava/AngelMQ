@@ -79,10 +79,6 @@ stages:
                   inputs:
                     version: '$(dotnetSdkVersion)'
                     performMultiLevelLookup: true
-                - task: NuGetAuthenticate@1
-                  displayName: 'Authenticate to NuGet.org'
-                  inputs:
-                    nuGetServiceConnections: 'Nuget Org'
                 - task: DotNetCoreCLI@2
                   displayName: 'Pack NuGet Package'
                   inputs:
@@ -93,6 +89,8 @@ stages:
                   env:
                     PACKAGE_VERSION: '$(packageVersion)'
                 - script: |
-                    dotnet nuget push $(Build.ArtifactStagingDirectory)/*.nupkg --source "Nuget Org" --api-key az --skip-duplicate
+                    dotnet nuget push $(Build.ArtifactStagingDirectory)/*.nupkg --source https://api.nuget.org/v3/index.json --api-key $(NUGET_API_KEY) --skip-duplicate
                   displayName: 'Push to NuGet.org'
+                  env:
+                    NUGET_API_KEY: $(NuGetApiKey)
           
