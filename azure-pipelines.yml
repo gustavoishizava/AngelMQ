@@ -19,6 +19,7 @@ variables:
   packageProject: '**/AngelMQ.csproj'
   unitTestPathPattern: '**/*UnitTests/*.csproj'
   previewCounter: $[counter(variables['Build.SourceBranchName'], 1)]
+  packageVersion: '$(Build.SourceBranchName)-preview$(previewCounter)'
 
 stages:
   - stage: Build_and_Test
@@ -86,12 +87,12 @@ stages:
                     versioningScheme: 'byEnvVar'
                     versionEnvVar: 'PACKAGE_VERSION'
                   env:
-                    PACKAGE_VERSION: '$(Build.SourceBranchName)-preview$(previewCounter)'
-                - task: NuGetCommand@2
+                    PACKAGE_VERSION: '$(packageVersion)'
+                - task: DotNetCoreCLI@2
                   displayName: 'Push to NuGet.org'
                   inputs:
                     command: 'push'
-                    packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
+                    packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg'
                     nuGetFeedType: 'external'
                     publishFeedCredentials: 'Nuget Org'
           
