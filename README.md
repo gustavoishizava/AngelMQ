@@ -13,8 +13,8 @@ Key goals:
 
 ## Features
 
-- **Connection management:** one connection for publishers and one connection for consumers (managed via `ConnectionProvider`/`IConnectionProvider`).
-- **Channels:** one channel per consumer and a channel pool for publishers (`ChannelPool`, `IChannelPool`, `IChannelProvider`) to minimize channel creation overhead.
+- **Connection management:** one connection for publishers and one connection for consumers (managed via `IConnectionProvider`).
+- **Channels:** one channel per consumer and a channel pool for publishers (`IChannelPool`, `IChannelProvider`) to minimize channel creation overhead.
 - **Simple configuration:** easy, declarative registration and configuration for creating consumers and publishers via DI extension methods.
 
 - **Dead-letter & parking-lot support:** built-in patterns for dead-letter queues (DLQ) and parking-lot queues to capture failed messages for later inspection or reprocessing.
@@ -30,7 +30,7 @@ Install via NuGet
 Install the library from NuGet into your project (recommended):
 
 ```bash
-dotnet add package AngelMQ
+dotnet add package AngelMQ --version 1.0.0
 ```
 
 Or add a `PackageReference` to your project file:
@@ -54,6 +54,11 @@ Use the `AddRabbitMQ` extension to configure connection factory options and chan
 ```csharp
 builder.Services.AddRabbitMQ(options =>
 {
+    options.ConnectionFactory.HostName = "localhost";
+    options.ConnectionFactory.UserName = "guest";
+    options.ConnectionFactory.Password = "guest";
+    options.ConnectionFactory.Port = 5672;
+    options.ConnectionFactory.VirtualHost = "/";
     options.ConnectionFactory.ConsumerDispatchConcurrency = 50;
     options.ConnectionFactory.ClientProvidedName = "AngelMQ.Consumer.SampleApp";
     options.ChannelPool.SetMaxSize(5);
@@ -111,7 +116,9 @@ builder.Services.AddExchangePublisher<SampleMessage, SampleExchangePublisher>(pr
     props.Configuration.Name = "accounts.exchange";
     props.Configuration.Type = "topic";
     props.AutoCreate = true;
-}).AddQueuePublisher<QueueMessage, SampleQueuePublisher>(props =>
+});
+
+builder.Services..AddQueuePublisher<QueueMessage, SampleQueuePublisher>(props =>
 {
     props.Configuration.Name = "notifications";
     props.AutoCreate = true;
@@ -136,7 +143,7 @@ public class MyService
         _publisher = publisher;
     }
 
-    public Task SendSample()
+    public Task SendSampleAsync()
     {
         return _publisher.PublishAsync(new SampleMessage { Id = 1, Country = "br" });
     }
@@ -155,14 +162,14 @@ public class DirectPublisherService
         _messagePublisher = messagePublisher;
     }
 
-    public Task PublishToExchange()
+    public Task PublishToExchangeAsync()
     {
         var message = new SampleMessage { Id = 42, Country = "mx" };
         // Publish to exchange with a routing key
         return _messagePublisher.PublishAsync(message, "accounts.exchange", "routing.key");
     }
 
-    public Task PublishToQueue()
+    public Task PublishToQueueAsync()
     {
         var queueMessage = new QueueMessage { Id = 7 };
         // Publish directly to a queue by using empty exchange and queue name as routing key
