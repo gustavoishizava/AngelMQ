@@ -89,8 +89,6 @@ stages:
                   env:
                     PACKAGE_VERSION: '$(packageVersion)'
                 - script: |
-                    dotnet nuget push $(Build.ArtifactStagingDirectory)/*.nupkg --source https://api.nuget.org/v3/index.json --api-key $(NUGET_API_KEY) --skip-duplicate
+                    dotnet nuget push $(Build.ArtifactStagingDirectory)/*.nupkg --source https://api.nuget.org/v3/index.json --api-key $(NuGetApiKey) --skip-duplicate
                   displayName: 'Push to NuGet.org'
-                  env:
-                    NUGET_API_KEY: '$(NuGetApiKey)'
           
