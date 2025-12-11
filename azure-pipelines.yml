@@ -84,9 +84,9 @@ stages:
                     command: 'pack'
                     packagesToPack: '$(packageProject)'
                     versioningScheme: 'byEnvVar'
-                    versionEnvVar: 'PackageVersion'
+                    versionEnvVar: 'PACKAGE_VERSION'
                   env:
-                    PackageVersion: '$(Build.SourceBranchName)-preview$(previewCounter)'
+                    PACKAGE_VERSION: '$(Build.SourceBranchName)-preview$(previewCounter)'
                 - task: NuGetCommand@2
                   displayName: 'Push to NuGet.org'
                   inputs:
