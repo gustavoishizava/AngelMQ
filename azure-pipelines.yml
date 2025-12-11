@@ -8,31 +8,46 @@ variables:
   solution: '**/*.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
+  dotnetSdkVersion: 8.0.x
+  unitTestPathPattern: '**/*UnitTests/*.csproj'
 
-steps:
-- task: UseDotNet@2
-  displayName: 'Install .NET Core SDK'
-  inputs:
-    version: 8.0.x
-    performMultiLevelLookup: true
-
-- task: DotNetCoreCLI@2
-  displayName: 'Dotnet build'
-  inputs:
-    command: 'build'
-
-- task: DotNetCoreCLI@2
-  displayName: 'Unit tests'
-  inputs:
-    command: 'test'
-    projects: '**/*.UnitTests/*.csproj'
-    arguments: '--configuration $(buildConfiguration) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover --collect:"XPlat Code Coverage'
-
-- task: PublishCodeCoverageResults@1
-  displayName: 'Publish code coverage report'
-  inputs:
-    codeCoverageTool: 'Cobertura'
-    summaryFileLocation: '$(Agent.TempDirectory)/**/coverage.cobertura.xml'
+stages:
+  - stage: Build_and_Test
+    displayName: 'Build and Test Stage'
+    jobs:
+      - job: Build
+        displayName: 'Build'
+        pool:
+          vmImage: 'ubuntu-24.04'
+        steps:
+          - task: UseDotNet@2
+            displayName: 'Install .NET Core SDK'
+            inputs:
+              version: '$(dotnetSdkVersion)'
+              performMultiLevelLookup: true
+          - task: DotNetCoreCLI@2
+            displayName: 'Dotnet Restore'
+            inputs:
+              command: 'restore'
+              projects: '$(solution)'
+              feedsToUse: 'select'
+          - task: DotNetCoreCLI@2
+            displayName: 'Dotnet build $(buildConfiguration)'
+            inputs:
+              command: 'build'
+              projects: '**/*.csproj'
+              arguments: '--configuration $(buildConfiguration)'
+          - task: DotNetCoreCLI@2
+            displayName: 'Run unit tests'
+            inputs:
+              command: test
+              projects: '$(unitTestPathPattern)'
+              arguments: '--configuration $(buildConfiguration) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover --collect:"XPlat Code Coverage"'
+          - task: PublishCodeCoverageResults@1
+            displayName: 'Publish code coverage report'
+            inputs:
+              codeCoverageTool: 'Cobertura'
+              summaryFileLocation: '$(Agent.TempDirectory)/**/coverage.cobertura.xml'
 
 # - task: DotNetCoreCLI@2
 #   displayName: 'Dotnet NuGet pack'
