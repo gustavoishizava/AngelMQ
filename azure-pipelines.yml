@@ -92,5 +92,5 @@ stages:
                     dotnet nuget push $(Build.ArtifactStagingDirectory)/*.nupkg --source https://api.nuget.org/v3/index.json --api-key $(NUGET_API_KEY) --skip-duplicate
                   displayName: 'Push to NuGet.org'
                   env:
-                    NUGET_API_KEY: $(NuGetApiKey)
+                    NUGET_API_KEY: '$(NuGetApiKey)'
           
