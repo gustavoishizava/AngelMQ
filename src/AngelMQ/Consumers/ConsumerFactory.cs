@@ -59,6 +59,10 @@ public sealed class ConsumerFactory(ILogger<ConsumerFactory> logger,
         }
         catch (Exception ex)
         {
+            logger.LogError(ex,
+                            "Error processing message with DeliveryTag {DeliveryTag}",
+                            args.DeliveryTag);
+
             await messageErrorHandler.HandleAsync(queueProperties,
                                                   consumer.Channel,
                                                   args,
