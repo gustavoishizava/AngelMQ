@@ -15,7 +15,7 @@ variables:
   solution: '**/*.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
-  dotnetSdkVersion: 8.0.x
+  dotnetSdkVersion: 10.0.x
   packageProject: '**/AngelMQ.csproj'
   unitTestPathPattern: '**/*UnitTests/*.csproj'
   previewCounter: $[counter(variables['Build.SourceBranchName'], 1)]
