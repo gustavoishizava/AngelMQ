@@ -1,15 +1,15 @@
 # AngelMQ
 
->A high-performance, ergonomic RabbitMQ wrapper for .NET 8 — focused on making publishers and consumers easy to implement while retaining low-latency and throughput.
+>A high-performance, ergonomic RabbitMQ wrapper for .NET 10 — focused on making publishers and consumers easy to implement while retaining low-latency and throughput.
 
 ## Overview
 
-AngelMQ is a lightweight library that builds on top of the official `RabbitMQ.Client` for .NET 8. It provides opinionated abstractions and helpers for connections, channel pooling, publishers and consumers so you can focus on business logic instead of RabbitMQ plumbing.
+AngelMQ is a lightweight library that builds on top of the official `RabbitMQ.Client` for .NET 10. It provides opinionated abstractions and helpers for connections, channel pooling, publishers and consumers so you can focus on business logic instead of RabbitMQ plumbing.
 
 Key goals:
 - **Performance:** efficient channel pooling and a minimal overhead API surface.
 - **Ease of use:** simple, testable patterns for publishers and consumers.
-- **.NET 8 friendly:** takes advantage of modern .NET runtime features and async/await patterns.
+- **.NET 10 friendly:** takes advantage of modern .NET runtime features and async/await patterns.
 
 ## Features
 
@@ -22,7 +22,7 @@ Key goals:
 ## Getting started
 
 Requirements:
-- .NET SDK 8.0
+- .NET SDK 10.0
 - RabbitMQ server (for runtime)
 
 Install via NuGet
