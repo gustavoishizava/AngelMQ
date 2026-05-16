@@ -25,7 +25,7 @@ public abstract class ExchangePublisher<TMessage>
         var exchange = properties.Configuration;
         exchange.Validate();
 
-        logger.LogInformation("Creating exchange {ExchangeName}.", exchange);
+        logger.LogInformation("Creating exchange {ExchangeName}.", exchange.Name);
 
         await channel.ExchangeDeclareAsync(exchange: exchange.Name,
                                            type: exchange.Type,
