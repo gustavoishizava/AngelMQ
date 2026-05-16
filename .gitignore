@@ -6,6 +6,9 @@
 # dotenv files
 .env
 
+# LS Cache
+*.lscache
+
 # User-specific files
 *.rsuser
 *.suo
